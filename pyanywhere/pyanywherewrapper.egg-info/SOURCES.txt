@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+pyanywhere/pyanywherewrapper.egg-info/PKG-INFO
+pyanywhere/pyanywherewrapper.egg-info/SOURCES.txt
+pyanywhere/pyanywherewrapper.egg-info/dependency_links.txt
+pyanywhere/pyanywherewrapper.egg-info/requires.txt
+pyanywhere/pyanywherewrapper.egg-info/top_level.txt
