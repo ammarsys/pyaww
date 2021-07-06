@@ -11,6 +11,9 @@ An API wrapper around the pythonanywhere's API. The name stands for `py`thon`a`n
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+pypi: https://pypi.org/project/pyaww/0.0.1/
+
 # Quick-start
 
 ```py
