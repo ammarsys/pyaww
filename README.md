@@ -1,6 +1,6 @@
-# pyanywhere-wrapper
+# pyaww
 
-An API wrapper around the pythonanywhere's API.
+An API wrapper around the pythonanywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
 
 - 100% api coverage
 - most of the codebase is documented & typehinted
@@ -15,7 +15,7 @@ An API wrapper around the pythonanywhere's API.
 
 ```py
 # import the module
-from pyanywhere import User
+from pyaww.user import User
 
 # construct the user class
 client = User(auth='...', username='...')
@@ -25,22 +25,22 @@ for console in client.consoles():
     print(console.name)
 ```
 
-Please look at the documentations: https://ammarsys.github.io/pyanywhere-wrapper-docs/
+Please look at the documentations: https://ammarsys.github.io/pyaww-docs/
 
 # Installation
 
 ```py
 # Linux/MacOS
-python3 -m pip install pyanywhere-wrapper
+python3 -m pip install pyaww
 
 # Windows
-py -m pip install pyanywhere-wrapper
+py -m pip install pyaww
 ```
 
 For the dev version, do:
 ```
-git clone https://github.com/ammarsys/pyanywhere-wrapper
-cd pyanywhere-wrapper
+git clone https://github.com/ammarsys/pyaww
+cd pyaww
 ```
 # How to get API a token?
 
