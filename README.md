@@ -11,9 +11,6 @@ An API wrapper around the pythonanywhere's API. The name stands for `py`thon`a`n
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-pypi: https://pypi.org/project/pyaww/0.0.1/
-
 # Quick-start
 
 ```py
@@ -45,6 +42,19 @@ For the dev version, do:
 git clone https://github.com/ammarsys/pyaww
 cd pyaww
 ```
-# How to get API a token?
+# FAQ
 
-Head over to https://www.pythonanywhere.com/account/#api_token, and you should be able to find it.
+### How do I get my accounts API token?
+ - Head over to https://www.pythonanywhere.com/account/#api_token, and you should be able to find it.
+
+### I have an issue, where can I recieve help?
+ - Please open an issue over [here](https://github.com/ammarsys/pyaww/issues).
+
+### Are there any examples?
+ - Yes! See [this](https://github.com/ammarsys/pyaww/tree/main/recipes) directory.
+
+### How do I contribute?
+ - To make a code change, make a fork of this repository, edit it and make a pull requests.
+
+### How to use this module in an async enviorment?
+ - Look into [this](https://pypi.org/project/aioify/) library.
