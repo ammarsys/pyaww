@@ -11,7 +11,7 @@ class File:
         Initialize class variables.
 
         :param path: path of the file
-        :param user: user class (see pyanywhere.user)
+        :param user: user class (see pyaww.user)
         """
         self.path = path
         self._user = user

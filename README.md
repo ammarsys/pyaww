@@ -2,11 +2,9 @@
 
 An API wrapper around the pythonanywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
 
-- 100% api coverage
-- most of the codebase is documented & typehinted
-- maintained
-
-![Open Source? Yes!](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
+- 100% AAPI coverage
+- Most of the codebase is documented & typehinted
+- Maintained
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
@@ -58,3 +56,6 @@ cd pyaww
 
 ### How to use this module in an async enviorment?
  - Look into [this](https://pypi.org/project/aioify/) library.
+
+### Where are the documentations?
+ - Over [here](https://ammarsys.github.io/pyaww-docs/).

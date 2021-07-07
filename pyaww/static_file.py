@@ -15,7 +15,7 @@ class StaticFile:
         Initialize class variables.
 
         :param dict resp: json dictionary
-        :param webapp: webapp class (see pyanywhere.webapp)
+        :param webapp: webapp class (see pyaww.webapp)
         """
         self._webapp = webapp
         vars(self).update(resp)

@@ -24,7 +24,7 @@ class WebApp:
         Initialize the class variables.
 
         :param dict resp: json dictionary
-        :param user: User class containing required functions (such as the request method)
+        :param user: User class see (pyaww.user)
         """
         self._user = user
         vars(self).update(resp)

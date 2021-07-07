@@ -16,7 +16,7 @@ class StaticHeader:
         Initialize the class variables.
 
         :param dict resp: json dictionary
-        :param webapp: WebApp class (see pyanywhere.webapp)
+        :param webapp: WebApp class (see pyaww.webapp)
         """
         self._webapp = webapp
         vars(self).update(resp)

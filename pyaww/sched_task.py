@@ -26,7 +26,7 @@ class SchedTask:
         Initialize class variables.
 
         :param resp: json dictionary
-        :param user: User class (see pyanywhere.user)
+        :param user: User class (see pyaww.user)
         """
         vars(self).update(resp)
         self._user = user
