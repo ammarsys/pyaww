@@ -2,7 +2,7 @@
 
 An API wrapper around the pythonanywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
 
-- 100% AAPI coverage
+- 100% API coverage
 - Most of the codebase is documented & typehinted
 - Maintained
 
@@ -18,7 +18,6 @@ from pyaww.user import User
 # construct the user class
 client = User(auth='...', username='...')
 
-# sample code
 for console in client.consoles():
     print(console.name)
 ```
@@ -52,10 +51,13 @@ cd pyaww
  - Yes! See [this](https://github.com/ammarsys/pyaww/tree/main/recipes) directory.
 
 ### How do I contribute?
- - To make a code change, make a fork of this repository, edit it and make a pull requests.
+ - To make a code change, make a fork of this repository, edit it and make a pull request. Make sure to follow PEP8 and document your code.
 
 ### How to use this module in an async enviorment?
  - Look into [this](https://pypi.org/project/aioify/) library.
 
 ### Where are the documentations?
  - Over [here](https://ammarsys.github.io/pyaww-docs/).
+
+### How to manually construct a class?
+ - Import the class (such as pyaww.file) and pass following things File({...}, client). The dots inside the dictionary represent class variables.
