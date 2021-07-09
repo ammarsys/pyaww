@@ -87,7 +87,7 @@ class User:
         Get a console by it's id.
 
         :param int id: ID of the console
-        :return: console class (see pyanywhere.console)
+        :return: console class (see pyaww.console)
         """
         resp = self.request('GET', f'/api/v0/user/{self.username}/consoles/{id}').json()
 
@@ -143,7 +143,7 @@ class User:
         Function to get a file. Does not error if not found.
 
         :param str path: path to the file
-        :return: File class (see pyanywhere.file)
+        :return: File class (see pyaww.file)
         """
         if '.' not in path.split('/')[-1]:
             raise PythonAnywhereError('Bad path, are you sure the path you\'re providing is a file?')
@@ -197,7 +197,7 @@ class User:
         Get a scheduled task via it's id.
 
         :param int id: ID of the scheduled task
-        :return: Task class (see pyanywhere.sched_task)
+        :return: Task class (see pyaww.sched_task)
         """
         resp = self.request('GET', f'/api/v0/user/{self.username}/schedule/{id}/').json()
         return SchedTask(resp, self)
@@ -222,7 +222,7 @@ class User:
         :param str hour: hour when the task should be executed
         :param str minute: minute when the task should be executed
         :param str description: description of the task
-        :return: scheduled task class (see pyanywhere.sched_task)
+        :return: scheduled task class (see pyaww.sched_task)
         """
 
         data = {'command': command, 'enabled': enabled, 'interval': interval, 'hour': hour, 'minute': minute,
@@ -240,7 +240,7 @@ class User:
         :param str command: command to be executed
         :param str description: description of the task
         :param bool enabled: whether the task should be enabled upon creation
-        :return: AlwaysOnTask (see pyanywhere.always_on_task)
+        :return: AlwaysOnTask (see pyaww.always_on_task)
         """
         data = {'command': command, 'description': description, 'enabled': enabled}
 
@@ -252,7 +252,7 @@ class User:
         Gets a always_on task.
 
         :param int id: ID of the task
-        :return: AlwaysOnTask (see pyanywhere.always_on_task)
+        :return: AlwaysOnTask (see pyaww.always_on_task)
         """
         resp = self.request('GET', f'/api/v0/user/{self.username}/always_on/{id}/').json()
         return AlwaysOnTask(resp, self)
@@ -309,7 +309,7 @@ class User:
         Sample usage -> User.get_webbapp_by_domain_name('yourname.pythonanywhere.com')
 
         :param str domain_name: webapps domain
-        :return: WebApp (see pyanywhere.webapp)
+        :return: WebApp (see pyaww.webapp)
         """
         resp = self.request('GET', f'/api/v0/user/{self.username}/webapps/{domain_name}/').json()
 
@@ -319,7 +319,7 @@ class User:
         """
         Get webapps for the user.
 
-        :return: a list of webapps (see pyanywhere.webapp)
+        :return: a list of webapps (see pyaww.webapp)
         """
         resp = self.request('GET', f'/api/v0/user/{self.username}/webapps/').json()
         return [WebApp(i, self) for i in resp]
@@ -332,7 +332,7 @@ class User:
 
         :param str domain_name: domain name of the webapp
         :param python_version: python version for the webapp to use (ex: python3.7)
-        :return: WebApp (see pyanywhere.webapp)
+        :return: WebApp (see pyaww.webapp)
         """
         data = {'domain_name': domain_name, 'python_version': python_version}
 
