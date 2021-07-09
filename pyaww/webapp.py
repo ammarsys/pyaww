@@ -83,7 +83,7 @@ class WebApp:
         """
         Gets webapps static files.
 
-        :return: list of static files (see pyanywhere.static_file)
+        :return: list of static files (see pyaww.static_file)
         """
 
         resp = self._user.request('GET', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/').json()
@@ -97,7 +97,7 @@ class WebApp:
 
         :param str file_path: path of the file
         :param str url: URL that should lead to the static file.
-        :return: a static file (see pyanywhere.static_file)
+        :return: a static file (see pyaww.static_file)
         """
         data = {'path': file_path, 'url': url}
         resp = self._user.request('POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/',
@@ -110,7 +110,7 @@ class WebApp:
         Get a static file via it's id.
 
         :param int id: ID of the static file
-        :return: a static file (see pyanywhere.static_file)
+        :return: a static file (see pyaww.static_file)
         """
         resp = self._user.request('GET',
                                   f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/{id}/').json()
@@ -136,7 +136,7 @@ class WebApp:
         :param str url: url for the static header
         :param str name: name of the static header
         :param dict value: value(s) for the header
-        :return: a static header (see pyanywhere.static_file)
+        :return: a static header (see pyaww.static_file)
         """
         data = {'url': url, 'name': name, 'value': value}
         resp = self._user.request(
