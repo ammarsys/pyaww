@@ -23,7 +23,7 @@ class WebApp:
         """
         Initialize the class variables.
 
-        :param dict resp: json dictionary
+        :param dict resp: json dictionar
         :param user: User class see (pyaww.user)
         """
         self._user = user
