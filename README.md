@@ -24,6 +24,7 @@ for console in client.consoles():
 
 Please look at the documentations: https://ammarsys.github.io/pyaww-docs/
 
+PyPi: https://pypi.org/project/pyaww
 # Installation
 
 ```py
