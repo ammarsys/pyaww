@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 
 class Console:
-    """All methods of a console/."""
+    """All methods of a console."""
     id: int
     user: 'User'
     executable: str
