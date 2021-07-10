@@ -39,7 +39,6 @@ class User:
         :param url: URL for the http request
         :param kwargs: any additional kwargs such as "data" for post requests
         :return: requests.models.Response
-        :raises: pythonanywhereerror
         """
         resp = None
 
@@ -83,12 +82,7 @@ class User:
         }
 
     def get_console_by_id(self, id: int) -> Console:
-        """
-        Get a console by it's id.
-
-        :param int id: ID of the console
-        :return: console class (see pyaww.console)
-        """
+        """Get a console by it's id."""
         resp = self.request('GET', f'/api/v0/user/{self.username}/consoles/{id}').json()
 
         return Console(resp, self)
@@ -164,26 +158,18 @@ class User:
                      files={'content': file})
 
     def students(self) -> dict:
-        """
-        List students of the user.
-
-        :return: json dictionary
-        """
+        """List students of the user."""
         return self.request('GET', f'/api/v0/user/{self.username}/students/').json()
 
     def remove_student(self, student: str) -> None:
-        """
-        Remove a student from the students list.
-
-        :param str student: student name to be removed
-        """
+        """Remove a student from the students list."""
         self.request('DELETE', f'/api/v0/user/{self.username}/students/{student}')
 
     def tasks(self) -> dict:
         """
         Get tasks for the user.
 
-        :return: json dictionary
+        :return: dictionary containing both scheduled and always_on tasks
         """
         schedules = self.request('GET', f'/api/v0/user/{self.username}/schedule/').json()
         always_on = self.request('GET', f'/api/v0/user/{self.username}/always_on').json()
@@ -193,12 +179,7 @@ class User:
         }
 
     def get_sched_task_by_id(self, id: int) -> SchedTask:
-        """
-        Get a scheduled task via it's id.
-
-        :param int id: ID of the scheduled task
-        :return: Task class (see pyaww.sched_task)
-        """
+        """Get a scheduled task via it's id."""
         resp = self.request('GET', f'/api/v0/user/{self.username}/schedule/{id}/').json()
         return SchedTask(resp, self)
 
@@ -248,12 +229,7 @@ class User:
         return AlwaysOnTask(resp, self)
 
     def get_always_on_task_by_id(self, id: int) -> AlwaysOnTask:
-        """
-        Gets a always_on task.
-
-        :param int id: ID of the task
-        :return: AlwaysOnTask (see pyaww.always_on_task)
-        """
+        """Gets a always_on task."""
         resp = self.request('GET', f'/api/v0/user/{self.username}/always_on/{id}/').json()
         return AlwaysOnTask(resp, self)
 
@@ -316,11 +292,7 @@ class User:
         return WebApp(resp, self)
 
     def webapps(self) -> List[WebApp]:
-        """
-        Get webapps for the user.
-
-        :return: a list of webapps (see pyaww.webapp)
-        """
+        """Get webapps for the user."""
         resp = self.request('GET', f'/api/v0/user/{self.username}/webapps/').json()
         return [WebApp(i, self) for i in resp]
 
