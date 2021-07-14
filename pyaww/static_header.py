@@ -36,7 +36,6 @@ class StaticHeader:
 
         :param kwargs: takes url, name, value
         """
-        print(kwargs, 'hello')
         self._webapp.userclass.request(
             'PATCH',
             f'/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_headers/{self.id}/',
