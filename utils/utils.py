@@ -26,11 +26,10 @@ def flatten(items: Any) -> Iterator:
 def cache_func(seconds: int = 300):
     def real_decorator(func: Callable[[P], T]) -> Callable[[P], T]:
         """
-        Cache functions. Automatically adds to dictionary. Cache time is 5 minutes.
+        Cache functions. Automatically adds to dictionary. Cache time is 5 minutes by default.
 
         :param func: function it's being decorated with
         """
-
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             if func.__name__ not in _cache:
                 _cache[func.__name__] = [None, None]
