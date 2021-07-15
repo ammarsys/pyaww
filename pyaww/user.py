@@ -6,16 +6,20 @@ from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
+from utils.utils import cache_func, update_cached_function
 
 from typing import Iterator, Optional, List, Dict
 from io import TextIOWrapper
+
 
 class PythonAnywhereError(Exception):
     """A base exception, nothing special to it, used everywhere."""
     pass
 
+
 class User:
     """The brain of the operation. All modules are connected to this class in one way or another."""
+
     def __init__(self, username: str, auth: str, from_eu: bool = False) -> None:
         """
         Initialize class variables.
@@ -233,6 +237,7 @@ class User:
         resp = self.request('GET', f'/api/v0/user/{self.username}/always_on/{id}/').json()
         return AlwaysOnTask(resp, self)
 
+    @cache_func(seconds=180)
     def python_versions(self) -> list:
         """
         Get all 3 ("python3", "python" and "run button") versions.
@@ -245,6 +250,7 @@ class User:
             self.request('GET', f'/api/v0/user/{self.username}/default_save_and_run_python_version/').json()
         ]
 
+    @update_cached_function(corresponding_function='python_versions')
     def set_python_version(self, version: float, command: str) -> None:
         """
         Set default python version.
@@ -259,6 +265,7 @@ class User:
             data={f'default_{command}_version': version}
         )
 
+    @cache_func(seconds=300)
     def get_system_image(self) -> dict:
         """
         Get the current system image. The system image for your account determines the
@@ -268,6 +275,7 @@ class User:
         """
         return self.request('GET', f'/api/v0/user/{self.username}/system_image/').json()
 
+    @update_cached_function(corresponding_function='get_system_image')
     def set_system_image(self, system_image: str) -> None:
         """
         Set the system image. Please see https://help.pythonanywhere.com/pages/ChangingSystemImage for the table.
