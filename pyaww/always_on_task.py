@@ -1,9 +1,14 @@
-from .sched_task import SchedTask
+"""Class for the always on tasks API endpoints"""
 
+# Standard library imports
 from typing import TYPE_CHECKING
+
+# Local application/library specific imports
+from .sched_task import SchedTask
 
 if TYPE_CHECKING:
     from .user import User
+
 
 class AlwaysOnTask(SchedTask):
     """Inherits sheduled task class because they're pretty similar. Only 1 method difference."""
