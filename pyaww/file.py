@@ -1,3 +1,5 @@
+"""Class for the file API endpoints"""
+
 from io import TextIOWrapper
 
 from typing import TYPE_CHECKING
@@ -5,7 +7,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .user import User
 
+
 class File:
+    """All methods related to a File"""
     def __init__(self, path: str, user: 'User') -> None:
         """
         Initialize class variables.
@@ -18,9 +22,7 @@ class File:
 
     def share(self) -> str:
         """
-        Function to start sharing a file.
-
-        Sample usage -> File.share()
+        Function to start sharing the file.
 
         :return: share url of the file
         """
@@ -29,11 +31,11 @@ class File:
                                   data={'path': self.path}).json()['url']
 
     def unshare(self) -> None:
-        """Function to stop sharing a file."""
+        """Function to stop sharing the file."""
         self._user.request('DELETE', f'/api/v0/user/{self._user.username}/files/sharing/?path={self.path}')
 
     def is_shared(self) -> bool:
-        """Function to check sharing status of a file."""
+        """Function to check sharing status of the file."""
         try:
             self._user.request('GET', f'/api/v0/user/{self._user.username}/files/sharing/?path={self.path}')
             return True
@@ -45,12 +47,12 @@ class File:
         self._user.request('DELETE', f'/api/v0/user/{self._user.username}/files/path/{self.path}')
 
     def read(self) -> bytes:
-        """Read files contents. The contents are in bytes, call decode() on it. Sample usage -> File.read()"""
+        """Read files contents. The contents are in bytes, call decode() on it."""
         return self._user.request('GET', f'/api/v0/user/{self._user.username}/files/path/{self.path}').content
 
     def update(self, content: TextIOWrapper) -> None:
         """
-        Update a file.
+        Update the file.
 
         Sample usage
         --------------
