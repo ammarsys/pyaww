@@ -1,3 +1,11 @@
+"""
+A lightweight API wrapper around the PythonAnywhere's API.
+
+The documentations are located at https://ammarsys.github.io/pyaww-docs/
+
+License: MIT
+"""
+
 from pyaww import (
     always_on_task,
     console,
@@ -9,4 +17,4 @@ from pyaww import (
     webapp
 )
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
