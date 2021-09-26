@@ -1,5 +1,9 @@
+"""Class for the console API endpoints"""
+
+# Standard library imports
 from typing import TYPE_CHECKING
 
+# Local application/library specific imports
 if TYPE_CHECKING:
     from .user import User
 
