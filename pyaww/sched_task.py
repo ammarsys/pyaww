@@ -1,11 +1,16 @@
+"""Class for the scheduled tasks API endpoints"""
+
+# Standard library imports
 from typing import TYPE_CHECKING
+
+# Local application/library specific imports
 
 if TYPE_CHECKING:
     from .user import User
 
 
 class SchedTask:
-    """A command that gets executed on a scheduled time. Can be hourly or daily."""
+    """A command that gets executed on a scheduled time, can be hourly or daily."""
     id: int
     url: str
     user: str
@@ -32,7 +37,7 @@ class SchedTask:
         self._user = user
 
     def delete(self) -> None:
-        """Delete a task. Sample usage -> SchedTask.delete()"""
+        """Delete the task."""
         self._user.request('DELETE', self.url)
 
     def update(self, **kwargs) -> None:
