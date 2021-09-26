@@ -1,4 +1,9 @@
+"""Class for the static file(s) API endpoints"""
+
+# Standard library imports
 from typing import TYPE_CHECKING
+
+# Local application/library specific imports
 
 if TYPE_CHECKING:
     from .webapp import WebApp
@@ -21,7 +26,7 @@ class StaticFile:
         vars(self).update(resp)
 
     def delete(self) -> None:
-        """Delete a static file."""
+        """Delete the static file."""
         self._webapp.userclass.request(
             'DELETE',
             f'/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_files/{self.id}/'
@@ -29,7 +34,7 @@ class StaticFile:
 
     def update(self, **kwargs) -> None:
         """
-        Update a static file.
+        Update the static file.
 
         Sample usage -> StaticFile.update(url='/static/myfile.html')
 
