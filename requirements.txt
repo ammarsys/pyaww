@@ -1,0 +1,2 @@
+typing_extensions==3.10.0.2
+requests==2.26.0
