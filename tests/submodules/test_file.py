@@ -5,7 +5,6 @@ import pytest
 # Local application/library specific imports
 
 from pyaww.user import File
-from pyaww.errors import NotFound
 
 
 def test_share(file: File) -> None:
@@ -17,8 +16,7 @@ def test_unshare(file: File) -> None:
 
 
 def test_sharing_status(file: File) -> None:
-    with pytest.raises(NotFound):
-        assert file.is_shared() is False
+    assert file.is_shared() is False
 
 
 def test_read(file: File) -> None:
