@@ -35,7 +35,7 @@ TEST_RELATIVE_PATH_TO_FILE = r"tests/assets/data.txt"
 TEST_STUDENT_TO_REMOVE = "ANYTHING_HERE"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def webapp(client: User) -> WebApp:
     """Construct a webapp"""
     return client.create_webapp(
