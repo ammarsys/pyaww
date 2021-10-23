@@ -1,7 +1,14 @@
-from typing import TYPE_CHECKING, List
+"""Class for webapp API endpoints"""
+
+# Standard library imports
+
+from typing import TYPE_CHECKING
+
+# Local application/library specific imports
 
 from .static_file import StaticFile
 from .static_header import StaticHeader
+from .errors import PythonAnywhereError
 
 if TYPE_CHECKING:
     from .user import User
@@ -9,6 +16,7 @@ if TYPE_CHECKING:
 
 class WebApp:
     """Contains all methods of a webapp."""
+
     id: int
     user: str
     domain_name: str
@@ -19,135 +27,157 @@ class WebApp:
     expiry: str
     force_https: bool
 
-    def __init__(self, resp: dict, user: 'User') -> None:
-        """
-        Initialize the class variables.
-
-        :param dict resp: json dictionary
-        :param user: User class see (pyaww.user)
-        """
+    def __init__(self, resp: dict, user: "User") -> None:
         self._user = user
         vars(self).update(resp)
 
     def delete(self) -> None:
         """Deletes a webapp."""
-        self._user.request('DELETE', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/')
+        self._user.request(
+            "DELETE", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/"
+        )
 
     def update(self, **kwargs) -> None:
         """
         Updates config of a webapp. Restart required.
 
-        Sample usage -> Webapp.update(python_version='3.7', force_https=False)
-
-        :param kwargs: can take: python_version, source_directory, virtualenv_path, force_https
+        Args:
+            **kwargs: can take: python_version, source_directory, virtualenv_path, force_https
         """
-        self._user.request('PATCH', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/', data=kwargs)
+        self._user.request(
+            "PATCH",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/",
+            data=kwargs,
+        )
         vars(self).update(kwargs)
 
     def reload(self) -> None:
-        """Reloads a webapp."""
-        self._user.request('POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/reload/')
+        """Reloads the webapp."""
+        self._user.request(
+            "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/reload/"
+        )
 
     def disable(self) -> None:
-        """Disables a webapp."""
-        self._user.request('POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/disable/')
+        """Disables the webapp."""
+        self._user.request(
+            "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/disable/"
+        )
 
     def enable(self) -> None:
-        """Enables a webapp."""
+        """Enables the webapp."""
         try:
-            self._user.request('POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/enable/')
-        except:
+            self._user.request(
+                "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/enable/"
+            )
+        except PythonAnywhereError:
             pass
 
     def get_ssl_info(self) -> dict:
-        """
-        Gets TLS/HTTP info of the webapp.
-
-        :return: json dictionary
-        """
-        return self._user.request('GET', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/').json()
+        """Gets TLS/HTTP info of the webapp."""
+        return self._user.request(
+            "GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/"
+        ).json()
 
     def set_ssl_info(self, cert: str, private_key: str) -> None:
         """
         Set the TLS/HTTP info. Webapp restart required.
 
-        Sample usage -> Webapp.set_ssl_info(cert=..., private_key=...)
-
-        :param str cert: TLS/HTTP certificate
-        :param str private_key: TLS/HTTP private key
+        Args:
+            cert (str): TLS/HTTP certificate
+            private_key (str): TLS/HTTP private key
         """
-        data = {'cert': cert, 'private_key': private_key}
-        return self._user.request('POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/', data=data).json()
+        data = {"cert": cert, "private_key": private_key}
+        self._user.request(
+            "POST",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/",
+            data=data,
+        ).json()
 
-    def static_files(self) -> List[StaticFile]:
-        """
-        Gets webapps static files.
-
-        :return: list of static files (see pyaww.static_file)
-        """
-
-        resp = self._user.request('GET', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/').json()
+    def static_files(self) -> list[StaticFile]:
+        """Gets webapps static files."""
+        resp = self._user.request(
+            "GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/"
+        ).json()
         return [StaticFile(i, self) for i in resp]
 
     def create_static_file(self, file_path: str, url: str = None) -> StaticFile:
         """
         Create a static file. Static files can be loaded much faster of disk. Webapp restart required.
 
-        Sample usage -> Webapp.create_static_file('/home/yourname/mysite/verify.html', '/static/verify.html')
+        Args:
+            file_path (str): path of the file
+            url (str): URL that should lead to the static file.
 
-        :param str file_path: path of the file
-        :param str url: URL that should lead to the static file.
-        :return: a static file (see pyaww.static_file)
+        Returns:
+            StaticFile
         """
-        data = {'path': file_path, 'url': url}
-        resp = self._user.request('POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/',
-                                  data=data).json()
+        data = {"path": file_path, "url": url}
+        resp = self._user.request(
+            "POST",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
+            data=data,
+        ).json()
 
         return StaticFile(resp, self)
 
-    def get_static_file_by_id(self, id: int) -> StaticFile:
+    def get_static_file_by_id(self, id_: int) -> StaticFile:
         """
         Get a static file via it's id.
 
-        :param int id: ID of the static file
-        :return: a static file (see pyaww.static_file)
+        Args:
+            id_ (int): ID of the static file
+
+        Returns:
+            StaticFile
         """
-        resp = self._user.request('GET',
-                                  f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/{id}/').json()
+        resp = self._user.request(
+            "GET",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/{id_}/",
+        ).json()
         return StaticFile(resp, self)
 
-    def static_headers(self) -> List[dict]:
+    def static_headers(self) -> list[dict]:
         """Get webapps static headers."""
-        resp = self._user.request('GET', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/').json()
-        return resp
+        return self._user.request(
+            "GET",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
+        ).json()
 
-    def get_static_header_by_id(self, id: int) -> StaticFile:
+    def get_static_header_by_id(self, id_: int) -> StaticHeader:
         """Get a static header by it's id."""
-        resp = self._user.request('GET',
-                                  f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/{id}/').json()
+        resp = self._user.request(
+            "GET",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/{id_}/",
+        ).json()
         return StaticHeader(resp, self)
 
     def create_static_header(self, url: str, name: str, value: dict) -> StaticHeader:
         """
         Create a static header for the webapp. Webapp restart required.
 
-        Sample usage -> Webapp.create_static_header(...)
+        Args:
+            url (str): url for the static header
+            name (str): name of the static header
+            value (dict): value(s) for the header
 
-        :param str url: url for the static header
-        :param str name: name of the static header
-        :param dict value: value(s) for the header
-        :return: a static header (see pyaww.static_file)
+        Returns:
+            StaticHeader
         """
-        data = {'url': url, 'name': name, 'value': value}
+        data = {"url": url, "name": name, "value": value}
         resp = self._user.request(
-            'POST', f'/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/',
-            data=data
-        )
-        return StaticHeader(resp.json(), self)
+            "POST",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
+            data=data,
+        ).json()
+        return StaticHeader(resp, self)
 
     @property
     def userclass(self):
+        """Property for accessing a protected member so it doesn't violate PEP8"""
         return self._user
 
     def __str__(self):
         return self.domain_name
+
+    def __eq__(self, other):
+        return self.domain_name == other.domain_name
