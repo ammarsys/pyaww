@@ -254,8 +254,6 @@ class User:
         enabled: bool = True,
         description: str = "",
     ) -> SchedTask:
-        print('CALLED')
-
         """
         Create a scheduled task. All times are in UTC.
 
