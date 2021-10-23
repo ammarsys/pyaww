@@ -1,10 +1,12 @@
 """Class for the file API endpoints"""
 
 # Standard library imports
-from io import TextIOWrapper
-from typing import TYPE_CHECKING
+
+from typing import TYPE_CHECKING, TextIO
 
 # Local application/library specific imports
+
+from .errors import PythonAnywhereError
 
 if TYPE_CHECKING:
     from .user import User
@@ -12,57 +14,65 @@ if TYPE_CHECKING:
 
 class File:
     """All methods related to a File"""
-    def __init__(self, path: str, user: 'User') -> None:
-        """
-        Initialize class variables.
 
-        :param path: path of the file
-        :param user: user class (see pyaww.user)
-        """
+    def __init__(self, path: str, user: "User") -> None:
         self.path = path
         self._user = user
 
     def share(self) -> str:
         """
-        Function to start sharing the file.
+        Share a file.
 
-        :return: share url of the file
+        Returns:
+            str: shared URL
         """
-        return self._user.request('POST',
-                                  f'/api/v0/user/{self._user.username}/files/sharing/',
-                                  data={'path': self.path}).json()['url']
+        return self._user.request(
+            "POST",
+            f"/api/v0/user/{self._user.username}/files/sharing/",
+            data={"path": self.path},
+        ).json()["url"]
 
     def unshare(self) -> None:
         """Function to stop sharing the file."""
-        self._user.request('DELETE', f'/api/v0/user/{self._user.username}/files/sharing/?path={self.path}')
+        self._user.request(
+            "DELETE",
+            f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+        )
 
     def is_shared(self) -> bool:
         """Function to check sharing status of the file."""
         try:
-            self._user.request('GET', f'/api/v0/user/{self._user.username}/files/sharing/?path={self.path}')
+            self._user.request(
+                "GET",
+                f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+            )
             return True
-        except:
+        except PythonAnywhereError:
             return False
 
     def delete(self) -> None:
         """Delete the file."""
-        self._user.request('DELETE', f'/api/v0/user/{self._user.username}/files/path/{self.path}')
+        self._user.request(
+            "DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
+        )
 
     def read(self) -> bytes:
         """Read files contents. The contents are in bytes, call decode() on it."""
-        return self._user.request('GET', f'/api/v0/user/{self._user.username}/files/path/{self.path}').content
+        return self._user.request(
+            "GET", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
+        ).content
 
-    def update(self, content: TextIOWrapper) -> None:
+    def update(self, content: TextIO) -> None:
         """
         Update the file.
 
-        Sample usage
-        --------------
-        with open('newcontent.txt', 'r') as f:
-            File.update(f)
-        --------------
+        Args:
+            content (TextIOWrapper): content the file shall be updated with
 
-        :param TextIOWrapper content: content the file should be updated with, will create if doesn't exist.
+        Examples:
+            >>> file = User(...).get_file_by_path('...')
+            >>> with open('newcontent.txt', 'r') as f:
+            >>>    file.update(f)
         """
         self._user.create_file(self.path, content)
 
