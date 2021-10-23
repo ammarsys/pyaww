@@ -24,7 +24,7 @@ from pyaww.errors import InvalidInfo
 
 def test_bad_client_token() -> None:
     with pytest.raises(InvalidInfo):
-        User(username='bad username', auth='bad info')
+        User(username="bad username", auth="bad info")
 
 
 def test_get_cpu_info(client) -> None:
@@ -56,7 +56,7 @@ def test_get_python_versions(client: User) -> None:
 
 
 def test_set_python_version(client: User) -> None:
-    assert client.set_python_version(3.8, 'python3') is None
+    assert client.set_python_version(3.8, "python3") is None
 
 
 def test_get_system_image(client: User) -> None:
@@ -64,7 +64,7 @@ def test_get_system_image(client: User) -> None:
 
 
 def test_set_system_image(client: User) -> None:
-    assert client.set_system_image('glastonbury') is None
+    assert client.set_system_image("glastonbury") is None
 
 
 def test_listdir(contents_of_a_path: Iterator[str]) -> None:

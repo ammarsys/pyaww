@@ -4,9 +4,9 @@ from pyaww.user import SchedTask
 
 
 def test_update(scheduled_task: SchedTask) -> None:
-    scheduled_task.update(description='A')
-    scheduled_task.update(description='B')
-    assert scheduled_task.description == 'B'
+    scheduled_task.update(description="A")
+    scheduled_task.update(description="B")
+    assert scheduled_task.description == "B"
 
 
 def test_delete(scheduled_task: SchedTask) -> None:

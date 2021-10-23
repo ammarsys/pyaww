@@ -1,7 +1,8 @@
-from pyaww.file import File
+import pyaww
 
-data = client.listdir('/home/mysite/')
-data = [client.get_file_by_path(path) for path in data]
+client = pyaww.user.User("...", "...")
+
+data = client.listdir("/home/mysite/")
+files = [client.get_file_by_path(path) for path in data]
 # or
-data = [File(path, client) for path in data]
-   
+files = [pyaww.file.File(path, client) for path in data]
