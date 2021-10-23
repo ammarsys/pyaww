@@ -9,4 +9,3 @@ def test_restart(always_on_task: AlwaysOnTask) -> None:
 
 def test_get_always_on_task_by_id(client: User, always_on_task: AlwaysOnTask) -> None:
     assert client.get_always_on_task_by_id(always_on_task.id) == always_on_task
-
