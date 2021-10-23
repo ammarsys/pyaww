@@ -1,20 +1,28 @@
-import requests
-import json
+"""
+A lightweight API wrapper around the PythonAnywhere's API.
 
+The documentations are located at https://ammarsys.github.io/pyaww-docs/
+
+License: MIT
+"""
+
+# Standard library imports
+
+import json
+from typing import Iterator, Optional, TextIO
+
+# Related third party imports
+
+import requests
+
+# Local application/library specific imports
 from .console import Console
 from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
+from .errors import raise_error
 from utils.utils import cache_func, update_cached_function
-
-from typing import Iterator, Optional, List, Dict
-from io import TextIOWrapper
-
-
-class PythonAnywhereError(Exception):
-    """A base exception, nothing special to it, used everywhere."""
-    pass
 
 
 class User:
@@ -22,109 +30,142 @@ class User:
 
     def __init__(self, username: str, auth: str, from_eu: bool = False) -> None:
         """
-        Initialize class variables.
-
-        :param str username: username of the API token
-        :param str auth: pythonanywhere token get it at https://www.pythonanywhere.com/account/#api_toke
-        :param bool from_eu: the url is tiny different for EU users hence why this is a parameter
+        Args:
+            username (str): Username of the account
+            auth (str): API token of the account
+            from_eu (bool): Whether you are from europe or not, because European accounts API URL is different
         """
         self.from_eu = from_eu
         self.username = username
         self.token = auth
         self.session = requests.Session()
-        self.headers = {'Authorization': f'Token {self.token}'}
-        self.request_url = 'https://www.pythonanywhere.com' if not self.from_eu else 'https://eu.pythonanywhere.com'
+        self.headers = {"Authorization": f"Token {self.token}"}
+        self.request_url = (
+            "https://www.pythonanywhere.com"
+            if not self.from_eu
+            else "https://eu.pythonanywhere.com"
+        )
+
+        if len(self.token) != 40:
+            raise_error((401, "Invalid token."))
 
     def request(self, method: str, url: str, **kwargs) -> requests.models.Response:
         """
         Custom function to send http requests which handles errors as well.
 
-        :param method: method for the http request
-        :param url: URL for the http request
-        :param kwargs: any additional kwargs such as "data" for post requests
-        :return: requests.models.Response
+        Args:
+            method (str): method for the http request
+            url (str): URL for the http request
+            **kwargs: any additional kwargs such as "data" for post requests
+
+        Returns:
+            requests.models.Response
         """
         resp = None
 
         try:
-            resp = self.session.request(method, self.request_url + url, headers=self.headers, **kwargs)
+            resp = self.session.request(
+                method, self.request_url + url, headers=self.headers, **kwargs
+            )
             jsoned = resp.json()
 
-            if 'detail' in jsoned:
-                raise PythonAnywhereError(jsoned['detail'])
-            elif 'error' in jsoned:
-                raise PythonAnywhereError(jsoned['error'])
-            elif 'error_message' in jsoned:
-                raise PythonAnywhereError(jsoned['error_message'])
-            elif 'non_field_errors' in jsoned:
-                raise PythonAnywhereError(jsoned['non_field_errors'])
+            for key in ("detail", "error", "error_message", "non_field_errors"):
+                if key in jsoned:
+                    raise_error((resp.status_code, jsoned[key]))
 
             return resp
         except json.decoder.JSONDecodeError:
             return resp
 
+    @cache_func(seconds=300)
     def get_cpu_info(self) -> dict:
         """
         Gets CPU information.
 
-        :return: dictionary that contains relevant information (next_reset_time, time_left, time_left_untiL_reset)
+        Returns:
+            dict: dictionary that contains relevant information (next_reset_time, time_left, time_left_untiL_reset)
         """
-        return self.request('GET', f'/api/v0/user/{self.username}/cpu/').json()
+        return self.request("GET", f"/api/v0/user/{self.username}/cpu/").json()
 
-    def consoles(self) -> Dict[str, List[Console]]:
+    def consoles(self) -> dict[str, list[Console]]:
         """
         Return a list of consoles for the user.
 
-        :return: dictionary with keys (personal, shared) and values of shared and personal consoles.
+        Returns:
+            Dict[str, List[Console]]:
+            dictionary with keys (personal, shared) and values of shared and personal consoles.
         """
-        personal = self.request('GET', f'/api/v0/user/{self.username}/consoles/').json()
-        shared = self.request('GET', f'/api/v0/user/{self.username}/consoles/shared_with_you/').json()
+        personal = self.request("GET", f"/api/v0/user/{self.username}/consoles/").json()
+        shared = self.request(
+            "GET", f"/api/v0/user/{self.username}/consoles/shared_with_you/"
+        ).json()
 
         return {
-            'personal': [Console(console, self) for console in personal],
-            'shared': [Console(console, self) for console in shared]
+            "personal": [Console(console, self) for console in personal],
+            "shared": [Console(console, self) for console in shared],
         }
 
-    def get_console_by_id(self, id: int) -> Console:
-        """Get a console by it's id."""
-        resp = self.request('GET', f'/api/v0/user/{self.username}/consoles/{id}').json()
+    def get_console_by_id(self, id_: int) -> Console:
+        """Get a console by its id."""
+        resp = self.request(
+            "GET", f"/api/v0/user/{self.username}/consoles/{id_}"
+        ).json()
 
         return Console(resp, self)
 
-    def create_console(self, executable: str, workingdir: str, arguments: str = '') -> Optional[Console]:
+    def create_console(
+        self, executable: str, workingdir: str = None, arguments: str = ""
+    ) -> Optional[Console]:
         """
-        Creates a console.
+        Creates a console. Console must be started upon creation to send input to it.
 
-        Sample usage -> User.create_console('python3.8', None, None)
+        Args:
+            executable (str): executable for the console to use (example python3.8)
+            workingdir (str): console arguments
+            arguments (str): working directory for console
 
-        :param executable: executable for the console to use (example python3.8)
-        :param arguments: console arguments
-        :param workingdir: working directory for console
-        :return: console object, console sucessfully created or None if console limit was hit
+        Examples:
+            >>> User(...).create_console('python3.8')
+
+        Returns:
+            Optional[Console]: console object, console sucessfully created or None if console limit was hit
         """
         try:
-            resp = self.request('POST',
-                                f'/api/v0/user/{self.username}/consoles/',
-                                data={'executable': executable, 'arguments': arguments, 'working_directory': workingdir}
-                                ).json()
+            resp = self.request(
+                "POST",
+                f"/api/v0/user/{self.username}/consoles/",
+                data={
+                    "executable": executable,
+                    "arguments": arguments,
+                    "working_directory": workingdir,
+                },
+            ).json()
 
             return Console(resp, self)
 
         except json.decoder.JSONDecodeError:
-            raise ValueError('You\'ve reached the maximum number of consoles.')
+            raise_error((403, "You've reached the maximum number of consoles."))
 
-    def listdir(self, path: str, recursive: bool = False, only_subdirectories: bool = True) -> Iterator[File]:
+    def listdir(
+        self, path: str, recursive: bool = False, only_subdirectories: bool = True
+    ) -> Iterator[str]:
         """
         List dir that crawls into dirs (if recursive is set to true), if not, list files and sub-dirs in a directory.
 
-        Sample usage -> User.listdir('/home/yourname/my_site/', recursive=True)
+        Args:
+            path (str): path to be "searched" for files / subdirs
+            recursive (bool): option whether subdirs and subdirs inside should be searched and so-on
+            only_subdirectories (bool): self explanatory
 
-        :param only_subdirectories: self explanatory
-        :param str path: path to be "searched" for files / subdirs
-        :param bool recursive: option whether subdirs and subdirs inside should be searched and so-on
-        :return: generator with paths
+        Examples:
+            >>> User(...).listdir('/home/yourname/my_site/', recursive=True)
+
+        Returns:
+            Iterator[str]: generator with paths
         """
-        resp = self.request('GET', f'/api/v0/user/{self.username}/files/tree/?path={path}').json()
+        resp = self.request(
+            "GET", f"/api/v0/user/{self.username}/files/tree/?path={path}"
+        ).json()
 
         if not recursive:
             yield resp
@@ -140,184 +181,235 @@ class User:
         """
         Function to get a file. Does not error if not found.
 
-        :param str path: path to the file
-        :return: File class (see pyaww.file)
+        Args:
+            path (str): path to the file
+
+        Returns:
+            File: File class (see pyaww.file)
         """
-        if '.' not in path.split('/')[-1]:
-            raise PythonAnywhereError('Bad path, are you sure the path you\'re providing is a file?')
 
         return File(path, self)
 
-    def create_file(self, path: str, file: TextIOWrapper) -> None:
+    def create_file(self, path: str, file: TextIO) -> File:
         """
         Create or update a file at a path.
 
-        Sample usage -> with open('./grocery_list.txt') as f: User.create_file('/home/yourname/grocery_list.txt', f)
+        Args:
+            path (str): path as to where the file shall be created (must include name + file extension in path)
+            file (TextIO): file to be created / updated
 
-        :param str path: path as to where the file shall be created (must include name + file extension in path)
-        :param TextIOWrapper file: file to be created / updated
+        Examples:
+            >>> with open('./grocery_list.txt') as f:
+            >>>    User(...).create_file('/home/yourname/grocery_list.txt', f)
         """
-        self.request('POST',
-                     f'/api/v0/user/{self.username}/files/path/{path}',
-                     files={'content': file})
+        self.request(
+            "POST",
+            f"/api/v0/user/{self.username}/files/path/{path}",
+            files={"content": file},
+        )
 
+        return File(path, self)
+
+    @cache_func(300)
     def students(self) -> dict:
         """List students of the user."""
-        return self.request('GET', f'/api/v0/user/{self.username}/students/').json()
+        return self.request("GET", f"/api/v0/user/{self.username}/students/").json()
 
+    @update_cached_function(corresponding_function="students")
     def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
-        self.request('DELETE', f'/api/v0/user/{self.username}/students/{student}')
+        self.request("DELETE", f"/api/v0/user/{self.username}/students/{student}")
 
-    def tasks(self) -> dict:
+    def tasks(self) -> dict[str, list]:
         """
         Get tasks for the user.
 
-        :return: dictionary containing both scheduled and always_on tasks
+        Returns:
+            dictionary containing both scheduled and always_on tasks
         """
-        schedules = self.request('GET', f'/api/v0/user/{self.username}/schedule/').json()
-        always_on = self.request('GET', f'/api/v0/user/{self.username}/always_on').json()
+        schedules = self.request(
+            "GET", f"/api/v0/user/{self.username}/schedule/"
+        ).json()
+        always_on = self.request(
+            "GET", f"/api/v0/user/{self.username}/always_on"
+        ).json()
         return {
-            'scheduled_tasks': [SchedTask(i, self) for i in schedules],
-            'always_on_tasks': [SchedTask(i, self) for i in always_on]
+            "scheduled_tasks": [SchedTask(i, self) for i in schedules],
+            "always_on_tasks": [AlwaysOnTask(i, self) for i in always_on],
         }
 
-    def get_sched_task_by_id(self, id: int) -> SchedTask:
+    def get_sched_task_by_id(self, id_: int) -> SchedTask:
         """Get a scheduled task via it's id."""
-        resp = self.request('GET', f'/api/v0/user/{self.username}/schedule/{id}/').json()
+        resp = self.request(
+            "GET", f"/api/v0/user/{self.username}/schedule/{id_}/"
+        ).json()
         return SchedTask(resp, self)
 
     def create_sched_task(
-            self,
-            command: str,
-            minute: str,
-            hour: str,
-            interval: str = "daily",
-            enabled: bool = True,
-            description: str = "",
+        self,
+        command: str,
+        minute: str,
+        hour: str,
+        interval: str = "daily",
+        enabled: bool = True,
+        description: str = "",
     ) -> SchedTask:
+        print('CALLED')
+
         """
         Create a scheduled task. All times are in UTC.
 
-        Sample usage -> User.create_sched_task('cmd', 5, 5, 'daily', True, 'perform "cmd"')
+        Args:
+            command (str): command to be executed every x time
+            minute (str): minute: minute when the task should be executed
+            hour (str): hour when the task should be executed
+            interval (str): frequency the task should happen (example, daily)
+            enabled (bool): option as to whether the task should be enabled
+            description (str): description of the task
 
-        :param str command: command to be executed every x time
-        :param bool enabled: option as to whether the task should be enabled
-        :param str interval: frequency the task should happen (example, daily)
-        :param str hour: hour when the task should be executed
-        :param str minute: minute when the task should be executed
-        :param str description: description of the task
-        :return: scheduled task class (see pyaww.sched_task)
+        Examples:
+            >>> User(...).create_sched_task('cmd', '5', '5', 'daily', False, 'do "cmd"')
+
+        Returns:
+            SchedTask
         """
+        data = {
+            "command": command,
+            "enabled": enabled,
+            "interval": interval,
+            "hour": hour,
+            "minute": minute,
+            "description": description,
+        }
 
-        data = {'command': command, 'enabled': enabled, 'interval': interval, 'hour': hour, 'minute': minute,
-                'description': description}
-
-        resp = self.request('POST', f'/api/v0/user/{self.username}/schedule/', data=data).json()
+        resp = self.request(
+            "POST", f"/api/v0/user/{self.username}/schedule/", data=data
+        ).json()
         return SchedTask(resp, self)
 
-    def create_always_on_task(self, command: str, description: str = '', enabled: bool = True) -> AlwaysOnTask:
+    def create_always_on_task(
+        self, command: str, description: str = "", enabled: bool = True
+    ) -> AlwaysOnTask:
         """
         Creates a always_on task, do not confuse it with a scheduled task.
 
-        Sample usage -> User.create_always_on_task('/home/yourname/myscript.py', 'Scrape a website', True)
+        Args:
+            command (str): command to be executed
+            description (str): description of the task
+            enabled (bool): whether the task should be enabled upon creation
 
-        :param str command: command to be executed
-        :param str description: description of the task
-        :param bool enabled: whether the task should be enabled upon creation
-        :return: AlwaysOnTask (see pyaww.always_on_task)
+        Examples:
+            >>> User(...).create_always_on_task('/home/yourname/myscript.py', 'Scrape a website', True)
+
+        Returns:
+            AlwaysOnTask
         """
-        data = {'command': command, 'description': description, 'enabled': enabled}
+        data = {"command": command, "description": description, "enabled": enabled}
 
-        resp = self.request('POST', f'/api/v0/user/{self.username}/always_on/', data=data).json()
+        resp = self.request(
+            "POST", f"/api/v0/user/{self.username}/always_on/", data=data
+        ).json()
         return AlwaysOnTask(resp, self)
 
-    def get_always_on_task_by_id(self, id: int) -> AlwaysOnTask:
-        """Gets a always_on task."""
-        resp = self.request('GET', f'/api/v0/user/{self.username}/always_on/{id}/').json()
+    def get_always_on_task_by_id(self, id_: int) -> AlwaysOnTask:
+        """Gets an always_on task."""
+        resp = self.request(
+            "GET", f"/api/v0/user/{self.username}/always_on/{id_}/"
+        ).json()
         return AlwaysOnTask(resp, self)
 
     @cache_func(seconds=180)
     def python_versions(self) -> list:
-        """
-        Get all 3 ("python3", "python" and "run button") versions.
-
-        :return: list of json dictionaries
-        """
+        """Get all 3 ("python3", "python" and "run button") versions."""
         return [
-            self.request('GET', f'/api/v0/user/{self.username}/default_python3_version/').json(),
-            self.request('GET', f'/api/v0/user/{self.username}/default_python_version/').json(),
-            self.request('GET', f'/api/v0/user/{self.username}/default_save_and_run_python_version/').json()
+            self.request(
+                "GET", f"/api/v0/user/{self.username}/default_python3_version/"
+            ).json(),
+            self.request(
+                "GET", f"/api/v0/user/{self.username}/default_python_version/"
+            ).json(),
+            self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/default_save_and_run_python_version/",
+            ).json(),
         ]
 
-    @update_cached_function(corresponding_function='python_versions')
+    @update_cached_function(corresponding_function="python_versions")
     def set_python_version(self, version: float, command: str) -> None:
         """
         Set default python version.
 
-        Sample usage -> User.set_python_version('3.8', 'python3')
+        Args:
+            version (float): version to be set
+            command (str): takes "python3", "python" and/or "save_and_run_python"
 
-        :param float version: version to be set
-        :param str command: takes "python3", "python" and/or "save_and_run_python"
+        Examples:
+            >>> User(...).set_python_version(3.8, 'python3')
         """
         self.request(
-            'PATCH', f'/api/v0/user/{self.username}/default_{command}_version/',
-            data={f'default_{command}_version': version}
+            "PATCH",
+            f"/api/v0/user/{self.username}/default_{command}_version/",
+            data={f"default_{command}_version": version},
         )
 
     @cache_func(seconds=300)
     def get_system_image(self) -> dict:
         """
-        Get the current system image. The system image for your account determines the
-        versions of Python that you can use and the packages that are pre-installed.
+        Get the current system image.
 
-        :return: json dictionary
+        The system image for your account determines the versions of Python that you can use and the packages that
+        are pre-installed.
         """
-        return self.request('GET', f'/api/v0/user/{self.username}/system_image/').json()
+        return self.request("GET", f"/api/v0/user/{self.username}/system_image/").json()
 
-    @update_cached_function(corresponding_function='get_system_image')
+    @update_cached_function(corresponding_function="get_system_image")
     def set_system_image(self, system_image: str) -> None:
         """
         Set the system image. Please see https://help.pythonanywhere.com/pages/ChangingSystemImage for the table.
 
-        Sample usage -> User.set_system_image('fishnchips') # see ^^^ to understand what's fishnchips
-
-        :param str system_image: system image to be set
+        Args:
+            system_image (str): system image to be set
         """
-        self.request('PATCH', f'/api/v0/user/{self.username}/system_image/', data={"system_image": system_image})
+        self.request(
+            "PATCH",
+            f"/api/v0/user/{self.username}/system_image/",
+            data={"system_image": system_image},
+        )
 
     def get_webapp_by_domain_name(self, domain_name: str) -> WebApp:
-        """
-        Get a webapp via it's name.
-
-        Sample usage -> User.get_webbapp_by_domain_name('yourname.pythonanywhere.com')
-
-        :param str domain_name: webapps domain
-        :return: WebApp (see pyaww.webapp)
-        """
-        resp = self.request('GET', f'/api/v0/user/{self.username}/webapps/{domain_name}/').json()
-
+        """Get a webapp via its domain."""
+        resp = self.request(
+            "GET", f"/api/v0/user/{self.username}/webapps/{domain_name}/"
+        ).json()
         return WebApp(resp, self)
 
-    def webapps(self) -> List[WebApp]:
+    @cache_func(300)
+    def webapps(self) -> list[WebApp]:
         """Get webapps for the user."""
-        resp = self.request('GET', f'/api/v0/user/{self.username}/webapps/').json()
+        resp = self.request("GET", f"/api/v0/user/{self.username}/webapps/").json()
         return [WebApp(i, self) for i in resp]
 
+    @update_cached_function(corresponding_function="webapps")
     def create_webapp(self, domain_name: str, python_version: str) -> WebApp:
         """
-        Create a webapp.
+        Creata a webapp.
 
-        Sample usage -> User.create_webapp('test.com', 'python3.8')
+        Args:
+            domain_name (str): domain name of the webapp
+            python_version (str): python version for the webapp to use (ex: python37 which stands for python 3.7)
 
-        :param str domain_name: domain name of the webapp
-        :param python_version: python version for the webapp to use (ex: python3.7)
-        :return: WebApp (see pyaww.webapp)
+        Examples:
+            >>> User(...).create_webapp('username.pythonanywhere.com', 'python39')
+
+        Returns:
+            WebApp
         """
-        data = {'domain_name': domain_name, 'python_version': python_version}
+        data = {"domain_name": domain_name, "python_version": python_version}
 
-        resp = self.request('POST', f'/api/v0/user/{self.username}/webapps/', data=data).json()
-        return WebApp(resp, self)
+        self.request(
+            "POST", f"/api/v0/user/{self.username}/webapps/", data=data
+        ).json()  # does not return all the necessary data for pyaww.WebApps init
+        return self.get_webapp_by_domain_name(domain_name=domain_name)
 
     def __enter__(self):
         return self
