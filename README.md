@@ -1,14 +1,18 @@
 # pyaww
 
-An API wrapper around the pythonanywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
-
-- 100% API coverage
-- Most of the codebase is documented & typehinted
-- Maintained
+![image](https://i.imgur.com/tWIb4cW.png)
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://badge.fury.io/py/pyaww.svg)](https://badge.fury.io/py/pyaww)
+
+A lightweight API wrapper around PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
+
+- 100% API coverage
+- Object-oriented
+- Fully documented & Typehinted
+- Caching & Ratelimiting handled
+
 # Quick-start
 
 ```py
@@ -22,7 +26,7 @@ for console in client.consoles():
     print(console.name)
 ```
 
-Please look at the documentations: https://ammarsys.github.io/pyaww-docs/
+Documentations: https://ammarsys.github.io/pyaww-docs/
 
 PyPi: https://pypi.org/project/pyaww
 # Installation
@@ -52,7 +56,7 @@ cd pyaww
  - Yes! See [this](https://github.com/ammarsys/pyaww/tree/main/recipes) directory.
 
 ### How do I contribute?
- - To make a code change, make a fork of this repository, edit it and make a pull request. Make sure to follow PEP8 and document your code.
+ - Please check out `CONTRIBUTING.MD`
 
 ### How to use this module in an async enviorment?
  - Look into [this](https://pypi.org/project/aioify/) library.
