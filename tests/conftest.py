@@ -21,24 +21,28 @@ from pyaww.user import User, File, Console, SchedTask, AlwaysOnTask, WebApp
 from pyaww.errors import PythonAnywhereError
 
 
-USERNAME = 'ammarsysdev'
-AUTH = 'b30c3de05a56d5141c7af96bf2922175f6817bf8'
+USERNAME = "ammarsysdev"
+AUTH = "119b1a7eac245332ba623bbcb5d2a5151af3757a"
 
 TEST_STARTED_CONSOLE = 22004897  # start the console in browser, should be bash
-TEST_PATH_TO_LISTDIR = '/home/ammarsysdev/mysite/mysite'  # preferably something that doesn't have too many subdirs
-TEST_PATH_TO_FILE = '/home/ammarsysdev/mysite/mysite/asgi.py'
-TEST_RELATIVE_PATH_TO_FILE = r'C:\Users\ammarsys\Desktop\pyaww\tests\assets\data.txt'  # should be full path
-TEST_PATH_FOR_NEW_FILE = '/home/ammarsysdev/mysite/mysite/data.txt'
-TEST_STUDENT_TO_REMOVE = 'someone'
+TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/mysite/mysite"  # preferably something that doesn't have too many subdirs
+TEST_PATH_TO_FILE = f"/home/{USERNAME}/mysite/mysite/asgi.py"
+TEST_RELATIVE_PATH_TO_FILE = (
+    r"tests\assets\data.txt"  # should be full path
+)
+TEST_PATH_FOR_NEW_FILE = f"/home/{USERNAME}/mysite/mysite/data.txt"
+TEST_STUDENT_TO_REMOVE = "someone"
 
 
 @pytest.fixture
 def webapp(client: User) -> WebApp:
     """Construct a webapp"""
-    return client.create_webapp(domain_name='ammarsysdev.pythonanywhere.com', python_version='python39')
+    return client.create_webapp(
+        domain_name=f"{USERNAME}.pythonanywhere.com", python_version="python39"
+    )
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client() -> User:
     """Construct the User (client) class"""
     return User(username=USERNAME, auth=AUTH)
@@ -47,7 +51,7 @@ def client() -> User:
 @pytest.fixture
 def unstarted_console(client) -> Console:
     """Create an unstarted console, this means you cannot send input to it"""
-    return client.create_console(executable='bash')
+    return client.create_console(executable="bash")
 
 
 @pytest.fixture
@@ -70,7 +74,7 @@ def file(client) -> File:
 
 @pytest.fixture
 def throwaway_file(client: User) -> File:
-    with open(TEST_RELATIVE_PATH_TO_FILE, 'r') as f:
+    with open(TEST_RELATIVE_PATH_TO_FILE, "r") as f:
         return client.create_file(TEST_PATH_FOR_NEW_FILE, f)
 
 
@@ -80,22 +84,18 @@ def student_name() -> str:
     return TEST_STUDENT_TO_REMOVE
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def scheduled_task(client: User) -> SchedTask:
     """Create a scheduled task"""
-    return client.create_sched_task(
-        command="echo hello world",
-        hour='5',
-        minute='5'
-    )
+    return client.create_sched_task(command="echo hello world", hour="5", minute="5")
 
 
 @pytest.fixture
-def always_on_task(client: User) -> AlwaysOnTask:
+def always_on_task(client: User):
     """Create an always_on task"""
     try:
-        return client.create_always_on_task(
-            command='cd'
-        )
+        return client.create_always_on_task(command="cd")
     except PythonAnywhereError:
-        pytest.skip("Max always_on tasks or a free account, skipping always_on task tests.")
+        pytest.skip(
+            "Max always_on tasks or a free account, skipping always_on task tests."
+        )

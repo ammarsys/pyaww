@@ -61,21 +61,20 @@ class User:
         Returns:
             requests.models.Response
         """
-        resp = None
+        resp = self.session.request(
+            method, self.request_url + url, headers=self.headers, **kwargs
+        )
 
         try:
-            resp = self.session.request(
-                method, self.request_url + url, headers=self.headers, **kwargs
-            )
             jsoned = resp.json()
-
+        except json.decoder.JSONDecodeError:
+            pass
+        else:
             for key in ("detail", "error", "error_message", "non_field_errors"):
                 if key in jsoned:
                     raise_error((resp.status_code, jsoned[key]))
 
-            return resp
-        except json.decoder.JSONDecodeError:
-            return resp
+        return resp
 
     @cache_func(seconds=300)
     def get_cpu_info(self) -> dict:

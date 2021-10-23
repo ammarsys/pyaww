@@ -3,12 +3,7 @@
 # Standard library imports
 import datetime
 from functools import wraps
-from typing import (
-    Any,
-    Iterator,
-    TypeVar,
-    Callable
-)
+from typing import Any, Iterator, TypeVar, Callable
 
 # Related third party imports
 from typing_extensions import ParamSpec
@@ -51,8 +46,10 @@ def cache_func(seconds: int = 300) -> Callable:
     Returns:
         Callable
     """
-    def real_decorator(func: Callable[[P], T]) -> Callable[[P], T]:
+
+    def real_decorator(func: Callable[P, T]) -> Callable[P, T]:
         """The actual decorator"""
+
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             """The wrapper"""
@@ -61,14 +58,21 @@ def cache_func(seconds: int = 300) -> Callable:
 
             cached_dict_value = cache[func.__name__]
 
-            if cached_dict_value[0] is None or datetime.datetime.now() > cached_dict_value[1]:
-                ret = func(*args, **kwargs)
-                cache[func.__name__] = [ret, datetime.datetime.now() + datetime.timedelta(seconds=seconds)]
-                return ret
-            else:
+            if (
+                cached_dict_value[0] is not None
+                and datetime.datetime.now() <= cached_dict_value[1]
+            ):
                 return cached_dict_value[0]
 
+            ret = func(*args, **kwargs)
+            cache[func.__name__] = [
+                ret,
+                datetime.datetime.now() + datetime.timedelta(seconds=seconds),
+            ]
+            return ret
+
         return wrapper
+
     return real_decorator
 
 
@@ -82,13 +86,15 @@ def update_cached_function(corresponding_function: str) -> Callable:
     Returns:
         Callable
     """
-    def real_decorator(func: Callable[[P], T]) -> Callable[[P], T]:
+
+    def real_decorator(func: Callable[P, T]) -> Callable[P, T]:
         """The actual decorator"""
+
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             """The wrapper"""
-            ret = func(*args, **kwargs)
             cache[corresponding_function] = [None, None]
-            return ret
+            return func(*args, **kwargs)
 
         return wrapper
+
     return real_decorator
