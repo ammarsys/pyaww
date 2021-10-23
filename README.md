@@ -65,4 +65,26 @@ cd pyaww
  - Over [here](https://ammarsys.github.io/pyaww-docs/).
 
 ### How to manually construct a class?
- - Import the class (such as pyaww.file) and pass following things File({...}, client). The dots inside the dictionary represent class variables.
+
+We know that the class variables for a console (taken from docs) are:
+
+- id
+- user
+- executable
+- arguments
+- working_directory
+- name
+- console_url
+- console_frame_url
+
+So we can do:
+
+```python
+from pyaww.user import Console, User
+
+console = Console(resp={
+    'id': ..., 
+    'user': ..., 
+    'executable': ...
+}, user=User(...))  # goes on
+```
