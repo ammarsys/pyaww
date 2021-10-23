@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 class SchedTask:
     """A command that gets executed on a scheduled time, can be hourly or daily."""
+
     id: int
     url: str
     user: str
@@ -26,30 +27,31 @@ class SchedTask:
     can_enable: bool
     description: str
 
-    def __init__(self, resp: dict, user: 'User') -> None:
-        """
-        Initialize class variables.
-
-        :param resp: json dictionary
-        :param user: User class (see pyaww.user)
-        """
+    def __init__(self, resp: dict, user: "User") -> None:
         vars(self).update(resp)
         self._user = user
 
     def delete(self) -> None:
         """Delete the task."""
-        self._user.request('DELETE', self.url)
+        self._user.request("DELETE", self.url)
 
     def update(self, **kwargs) -> None:
         """
-        Updates a scheduled task. All times are in UTC.
+        Updates the task. All times are in UTC.
 
-        Sample usage -> SchedTask.update(command='cmd', description'Execute "cmd"')
+        Args:
+            **kwargs: command str, minute str, hour str, interval str, description str,
+            enabled bool
 
-        :param kwargs: can include: command str, minute str, hour str, interval str, description str, enabled bool
+        Examples:
+            >>> task = User(...).get_sched_task_by_id(...)
+            >>> task.update(command='cd')
         """
-        self._user.request('PATCH', self.url, data=kwargs)
+        self._user.request("PATCH", self.url, data=kwargs)
         vars(self).update(kwargs)
 
     def __str__(self):
         return self.url
+
+    def __eq__(self, other):
+        return self.url == other.url
