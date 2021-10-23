@@ -18,7 +18,7 @@ import pytest
 
 # Local application/library specific imports
 
-from pyaww.user import User, SchedTask, AlwaysOnTask, WebApp
+from pyaww.user import User
 from pyaww.errors import InvalidInfo
 
 
@@ -47,10 +47,6 @@ def test_get_tasks(client: User) -> None:
     assert isinstance(client.tasks(), dict)
 
 
-def test_get_sched_task_by_id(client: User, scheduled_task: SchedTask) -> None:
-    assert client.get_sched_task_by_id(scheduled_task.id) == scheduled_task
-
-
 def test_get_python_versions(client: User) -> None:
     assert isinstance(client.python_versions(), list)
 
@@ -71,13 +67,5 @@ def test_listdir(contents_of_a_path: Iterator[str]) -> None:
     assert isinstance(contents_of_a_path, GeneratorType)
 
 
-def test_get_always_on_task_by_id(client: User, always_on_task: AlwaysOnTask) -> None:
-    assert client.get_always_on_task_by_id(always_on_task.id) == always_on_task
-
-
 def test_get_webapps(client: User) -> None:
     assert isinstance(client.webapps(), list)
-
-
-def test_get_webapp_by_domain(client: User, webapp: WebApp) -> None:
-    assert client.get_webapp_by_domain_name(webapp.domain_name) == webapp
