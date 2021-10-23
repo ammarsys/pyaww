@@ -9,6 +9,7 @@ PyAwws test file. To properly test the module, use a "fresh account". Some guidl
 """
 # Standard library imports
 
+import json, os
 from typing import Iterator
 
 # Related third party imports
@@ -17,21 +18,21 @@ import pytest
 
 # Local library/libraary specific imports
 
-from pyaww.user import User, File, Console, SchedTask, AlwaysOnTask, WebApp
+from pyaww.user import User, File, Console, SchedTask, WebApp
 from pyaww.errors import PythonAnywhereError
 
+with open(r"tests/assets/settings.json", "r") as f:
+    data = json.load(f)
 
-USERNAME = "ammarsysdev"
-AUTH = "119b1a7eac245332ba623bbcb5d2a5151af3757a"
+USERNAME = data['USERNAME']
+AUTH = data['AUTH']
+STARTED_CONSOLE = data['STARTED_CONSOLE']
 
-TEST_STARTED_CONSOLE = 22004897  # start the console in browser, should be bash
-TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/mysite/mysite"  # preferably something that doesn't have too many subdirs
-TEST_PATH_TO_FILE = f"/home/{USERNAME}/mysite/mysite/asgi.py"
-TEST_RELATIVE_PATH_TO_FILE = (
-    r"tests\assets\data.txt"  # should be full path
-)
-TEST_PATH_FOR_NEW_FILE = f"/home/{USERNAME}/mysite/mysite/data.txt"
-TEST_STUDENT_TO_REMOVE = "someone"
+TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/"
+TEST_PATH_FOR_NEW_FILE = f"/home/{USERNAME}/pyaww_test_data.txt"
+
+TEST_RELATIVE_PATH_TO_FILE = r"tests/assets/data.txt"
+TEST_STUDENT_TO_REMOVE = "ANYTHING_HERE"
 
 
 @pytest.fixture
@@ -57,7 +58,7 @@ def unstarted_console(client) -> Console:
 @pytest.fixture
 def started_console(client) -> Console:
     """Get a started console"""
-    return client.get_console_by_id(id_=TEST_STARTED_CONSOLE)
+    return client.get_console_by_id(id_=STARTED_CONSOLE)
 
 
 @pytest.fixture
@@ -67,15 +68,9 @@ def contents_of_a_path(client) -> Iterator[str]:
 
 
 @pytest.fixture
-def file(client) -> File:
-    """Get a PythonAnywhere file"""
-    return client.get_file_by_path(TEST_PATH_TO_FILE)
-
-
-@pytest.fixture
-def throwaway_file(client: User) -> File:
-    with open(TEST_RELATIVE_PATH_TO_FILE, "r") as f:
-        return client.create_file(TEST_PATH_FOR_NEW_FILE, f)
+def file(client: User) -> File:
+    with open(TEST_RELATIVE_PATH_TO_FILE, "r") as file:
+        return client.create_file(TEST_PATH_FOR_NEW_FILE, file)
 
 
 @pytest.fixture
