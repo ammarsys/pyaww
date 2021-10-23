@@ -9,7 +9,7 @@ PyAwws test file. To properly test the module, use a "fresh account". Some guidl
 """
 # Standard library imports
 
-import json, os
+import json
 from typing import Iterator
 
 # Related third party imports
