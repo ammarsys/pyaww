@@ -1,4 +1,10 @@
+"""Class for the console API endpoints"""
+
+# Standard library imports
+
 from typing import TYPE_CHECKING
+
+# Local library/library specific imports
 
 if TYPE_CHECKING:
     from .webapp import WebApp
@@ -6,39 +12,33 @@ if TYPE_CHECKING:
 
 class StaticHeader:
     """Contains all relevant methods to a static header."""
+
     id: int
     url: str
     name: str
     value: dict
 
-    def __init__(self, resp: dict, webapp: 'WebApp') -> None:
-        """
-        Initialize the class variables.
-
-        :param dict resp: json dictionary
-        :param webapp: WebApp class (see pyaww.webapp)
-        """
+    def __init__(self, resp: dict, webapp: "WebApp") -> None:
         self._webapp = webapp
         vars(self).update(resp)
 
     def delete(self) -> None:
-        """Delete a static header."""
+        """Delete the static header."""
         self._webapp.userclass.request(
-            'DELETE',
-            f'/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_headers/{self.id}/',
+            "DELETE",
+            f"/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_headers/{self.id}/",
         )
 
     def update(self, **kwargs) -> None:
         """
-        Update a static header.
+        Update the static header.
 
-        Sample usage -> StaticHeader.update(...)
-
-        :param kwargs: takes url, name, value
+        Args:
+            **kwargs: takes url, name, value
         """
         self._webapp.userclass.request(
-            'PATCH',
-            f'/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_headers/{self.id}/',
-            data=kwargs
+            "PATCH",
+            f"/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_headers/{self.id}/",
+            data=kwargs,
         )
         vars(self).update(kwargs)
