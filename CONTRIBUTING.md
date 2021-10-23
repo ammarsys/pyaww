@@ -16,10 +16,24 @@ First, thanks for taking the time to contribute! ❤️ All contributions are we
 - Use [Google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) docstrings
 - You should format your code using [black](https://pypi.org/project/black/) 
 - You should sort imports using [isort](https://pypi.org/project/isort/) 
-- You should run tests using [pytest](https://pypi.org/project/pytest/) before creating a pull request 
-(the tests/ directory)
+- You should run tests using [pytest](https://pypi.org/project/pytest/) before creating a pull request
 - Your code must be typehinted. Look into `pyright` or `pylance` type checkers if you do not have one
 - Write efficient and clean code
+
+## How to run the tests?
+
+- Install `pytest` library if you don't have it via `py -m pip install pytest`
+- Navigate to `pyaww/tests/assets` and create `settings.json`. It should contain:
+```json
+{
+  "USERNAME": "YOUR_NAME",
+  "AUTH": "YOUR_TOKEN",
+  "STARTED_CONSOLE": 123
+}
+```
+- Ensure your CWD is `pyaww` and not `pyaww/tests` or similar
+- Run `py -m pytest/tests`
+- Fix if anything is wrong, if not, your tests are fine
 
 ## What is currently our TODO?
 - Better caching, specifically, caching inside instances that `pyaww.user.User` returns.
