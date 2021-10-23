@@ -25,12 +25,12 @@ def test_read(file: File) -> None:
     assert isinstance(file.read().decode(), str)
 
 
-def test_update(throwaway_file: File) -> None:
+def test_update(file: File) -> None:
     with open("tests/assets/data.txt") as f:
-        throwaway_file.update(f)
+        file.update(f)
         f.seek(0)
-        assert throwaway_file.read().decode() == f.read()
+        assert file.read().decode() == f.read()
 
 
-def test_delete(throwaway_file: File) -> None:
-    assert throwaway_file.delete() is None
+def test_delete(file: File) -> None:
+    assert file.delete() is None
