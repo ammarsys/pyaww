@@ -25,6 +25,6 @@ setuptools.setup(
     ],
     packages=["pyaww"],
     install_requires=["typing_extensions==3.10.0.0", "requests==2.25.1"],
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     license="MIT",
 )
