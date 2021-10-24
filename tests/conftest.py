@@ -25,9 +25,9 @@ from pyaww.errors import PythonAnywhereError
 with open(r"tests/assets/settings.json", "r") as f:
     data = json.load(f)
 
-USERNAME = data['USERNAME']
-AUTH = data['AUTH']
-STARTED_CONSOLE = data['STARTED_CONSOLE']
+USERNAME = data["USERNAME"]
+AUTH = data["AUTH"]
+STARTED_CONSOLE = data["STARTED_CONSOLE"]
 
 TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/"
 TEST_PATH_FOR_NEW_FILE = f"/home/{USERNAME}/pyaww_test_data.txt"
@@ -101,20 +101,19 @@ def always_on_task(client: User):
 def static_file(webapp: WebApp) -> StaticFile:
     """Create a static file. Webapp restart required."""
     static_file = webapp.create_static_file(
-        file_path=f'/home/{USERNAME}/README.txt',
-        url='PYAWW URL FIXTURE'
+        file_path=f"/home/{USERNAME}/README.txt", url="PYAWW URL FIXTURE"
     )
     webapp.restart()
     return static_file
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def static_header(webapp: WebApp) -> StaticHeader:
     """Create a static file. Webapp restart required."""
     static_file = webapp.create_static_header(
-        value={'PYAWW KEY': 'PYAWW VALUE'},
-        url='PYAWW URL FIXTURE',
-        name='PYAWW SAMPLE NAME'
+        value={"PYAWW KEY": "PYAWW VALUE"},
+        url="PYAWW URL FIXTURE",
+        name="PYAWW SAMPLE NAME",
     )
     webapp.restart()
     return static_file

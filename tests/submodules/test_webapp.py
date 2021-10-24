@@ -12,9 +12,9 @@ def test_get_static_file_by_id(static_file: StaticFile, webapp: WebApp) -> None:
 
 
 def test_static_file_update(static_file: StaticFile, webapp: WebApp) -> None:
-    static_file.update(url='PYAWW TESTING')
+    static_file.update(url="PYAWW TESTING")
     webapp.restart()
-    assert static_file.url == 'PYAWW TESTING'
+    assert static_file.url == "PYAWW TESTING"
 
 
 def test_static_file_delete(static_file: StaticFile) -> None:
@@ -26,9 +26,9 @@ def test_get_static_header_by_id(static_header: StaticHeader, webapp: WebApp) ->
 
 
 def test_static_header_update(static_header: StaticHeader, webapp: WebApp) -> None:
-    static_header.update(url='PYAWW TESTING')
+    static_header.update(url="PYAWW TESTING")
     webapp.restart()
-    assert static_header.url == 'PYAWW TESTING'
+    assert static_header.url == "PYAWW TESTING"
 
 
 def test_static_header_delete(static_header: StaticHeader) -> None:
@@ -57,7 +57,7 @@ def test_get_ssl_info(webapp: WebApp) -> None:
 
 
 def test_set_ssl_info(webapp: WebApp) -> None:
-    assert webapp.set_ssl_info(cert='PYAWWTEST', private_key='PYAWWTEST') is None
+    assert webapp.set_ssl_info(cert="PYAWWTEST", private_key="PYAWWTEST") is None
 
 
 def test_reload(webapp: WebApp) -> None:
