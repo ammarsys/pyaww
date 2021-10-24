@@ -39,10 +39,11 @@ class WebApp:
 
     def update(self, **kwargs) -> None:
         """
-        Updates config of a webapp. Restart required.
+        Updates config of a webapp. Reload required.
 
         Args:
-            **kwargs: can take: python_version, source_directory, virtualenv_path, force_https
+            **kwargs: can take: python_version, source_directory, virtualenv_path, force_https,
+            password_protection_enabled, password_protection_username, password_protection_password
         """
         self._user.request(
             "PATCH",
@@ -51,7 +52,7 @@ class WebApp:
         )
         vars(self).update(kwargs)
 
-    def reload(self) -> None:
+    def restart(self) -> None:
         """Reloads the webapp."""
         self._user.request(
             "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/reload/"
@@ -80,7 +81,7 @@ class WebApp:
 
     def set_ssl_info(self, cert: str, private_key: str) -> None:
         """
-        Set the TLS/HTTP info. Webapp restart required.
+        Set the TLS/HTTP info. Webapp reload required.
 
         Args:
             cert (str): TLS/HTTP certificate
@@ -100,9 +101,9 @@ class WebApp:
         ).json()
         return [StaticFile(i, self) for i in resp]
 
-    def create_static_file(self, file_path: str, url: str = None) -> StaticFile:
+    def create_static_file(self, file_path: str, url: str) -> StaticFile:
         """
-        Create a static file. Static files can be loaded much faster of disk. Webapp restart required.
+        Create a static file. Webapp reload required.
 
         Args:
             file_path (str): path of the file
@@ -153,7 +154,7 @@ class WebApp:
 
     def create_static_header(self, url: str, name: str, value: dict) -> StaticHeader:
         """
-        Create a static header for the webapp. Webapp restart required.
+        Create a static header for the webapp. Webapp reload required.
 
         Args:
             url (str): url for the static header
