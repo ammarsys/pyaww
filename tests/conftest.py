@@ -19,6 +19,7 @@ import pytest
 # Local library/libraary specific imports
 
 from pyaww.user import User, File, Console, SchedTask, WebApp
+from pyaww.static_file import StaticFile, StaticHeader
 from pyaww.errors import PythonAnywhereError
 
 with open(r"tests/assets/settings.json", "r") as f:
@@ -94,3 +95,26 @@ def always_on_task(client: User):
         pytest.skip(
             "Max always_on tasks or a free account, skipping always_on task tests."
         )
+
+
+@pytest.fixture
+def static_file(webapp: WebApp) -> StaticFile:
+    """Create a static file. Webapp restart required."""
+    static_file = webapp.create_static_file(
+        file_path=f'/home/{USERNAME}/README.txt',
+        url='PYAWW URL FIXTURE'
+    )
+    webapp.restart()
+    return static_file
+
+
+@pytest.fixture(scope='session')
+def static_header(webapp: WebApp) -> StaticHeader:
+    """Create a static file. Webapp restart required."""
+    static_file = webapp.create_static_header(
+        value={'PYAWW KEY': 'PYAWW VALUE'},
+        url='PYAWW URL FIXTURE',
+        name='PYAWW SAMPLE NAME'
+    )
+    webapp.restart()
+    return static_file
