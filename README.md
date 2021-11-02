@@ -24,8 +24,6 @@ The documentation can be found [here](https://pyaww-docs.vercel.app/).
 
 # Quick-start
 
-<hr>
-
 The required Python version for this module is `3.9` or above. This is as of `0.0.4`, versions below support `3.6+`.
 
 
@@ -63,8 +61,6 @@ There are more examples in the `repices` directory.
 # Frequently Asked Questions
 
 </div>
-
-
 
 **Q: How do I get my accounts API token?**
 
