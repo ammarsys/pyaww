@@ -64,7 +64,7 @@ There are more examples in the `repices` directory.
 
 </div>
 
-<hr>
+
 
 **Q: How do I get my accounts API token?**
 
