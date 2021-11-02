@@ -1,19 +1,49 @@
-# pyaww
+<div align="center">
 
-![image](https://i.imgur.com/tWIb4cW.png)
+![image](https://i.imgur.com/jXVDRs6.png)
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/pyaww.svg)](https://badge.fury.io/py/pyaww)
+[![Code Size](https://img.shields.io/github/languages/code-size/ammarsys/pyaww)](https://img.shields.io/github/languages/code-size/ammarsys/pyaww)
+</div>
 
-A lightweight API wrapper around PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
+<hr>
+
+# Overview
+
+A lightweight API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
 
 - 100% API coverage
 - Object-oriented
 - Fully documented & Typehinted
 - Caching & Ratelimiting handled
+- 100% tested
+
+The documentation can be found [here](https://pyaww-docs.vercel.app/).
 
 # Quick-start
+
+<hr>
+
+The required Python version for this module is `3.9` or above. This is as of `0.0.4`, versions below support `3.6+`.
+
+
+```py
+# Linux/MacOS
+python3 -m pip install pyaww
+
+# Windows
+py -m pip install pyaww
+```
+
+For the development version do,
+```
+git clone https://github.com/ammarsys/pyaww/tree/dev
+cd pyaww
+```
+
+Mini example,
 
 ```py
 # import the module
@@ -26,47 +56,44 @@ for console in client.consoles():
     print(console.name)
 ```
 
-Documentations: https://ammarsys.github.io/pyaww-docs/
+There are more examples in the `repices` directory.
 
-PyPi: https://pypi.org/project/pyaww
-# Installation
+<div align="center">
 
-```py
-# Linux/MacOS
-python3 -m pip install pyaww
+# Frequently Asked Questions
 
-# Windows
-py -m pip install pyaww
-```
+</div>
 
-For the dev version, do:
-```
-git clone https://github.com/ammarsys/pyaww
-cd pyaww
-```
-# FAQ
+<hr>
 
-### How do I get my accounts API token?
- - Head over to https://www.pythonanywhere.com/account/#api_token, and you should be able to find it.
+**Q: How do I get my accounts API token?**
 
-### I have an issue, where can I recieve help?
- - Please open an issue over [here](https://github.com/ammarsys/pyaww/issues).
+**A:** Head over to https://www.pythonanywhere.com/account/#api_token, and you should be able to find it.
 
-### Are there any examples?
- - Yes! See [this](https://github.com/ammarsys/pyaww/tree/main/recipes) directory.
+<hr>
 
-### How do I contribute?
- - Please check out `CONTRIBUTING.MD`
+**Q: I have an issue, where can I receive help?**
 
-### How to use this module in an async enviorment?
- - Look into [this](https://pypi.org/project/aioify/) library.
+**A:** Please open an issue over [here](https://github.com/ammarsys/pyaww/issues).
 
-### Where are the documentations?
- - Over [here](https://ammarsys.github.io/pyaww-docs/).
+<hr>
 
-### How to manually construct a class?
+**Q: How do I contribute?**
 
-We know that the class variables for a console (taken from docs) are:
+**A:** We have a guide for that, please see `CONTRIBUTING.MD` in this repository.
+
+<hr>
+
+**Q: How to use this module in an async environment?**
+
+**A:** Look into [this](https://pypi.org/project/aioify/) library.
+
+<hr>
+
+
+**Q: How to manually construct a class?**
+
+We know that the class variables for a console (taken from the docs) are:
 
 - id
 - user
@@ -86,5 +113,5 @@ console = Console(resp={
     'id': ..., 
     'user': ..., 
     'executable': ...
-}, user=User(...))  # goes on
+}, user=User(...)) # and the other stuff
 ```
