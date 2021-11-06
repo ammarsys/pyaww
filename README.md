@@ -7,27 +7,25 @@
 [![PyPI version](https://badge.fury.io/py/pyaww.svg)](https://badge.fury.io/py/pyaww)
 [![Code Size](https://img.shields.io/github/languages/code-size/ammarsys/pyaww)](https://img.shields.io/github/languages/code-size/ammarsys/pyaww)
 </div>
-
 <hr>
 
 # Overview
 
-A lightweight API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper.
+An API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper. The key-feautures are,
 
-- 100% API coverage
+- 100% API coverage, 100% tested
 - Object-oriented
 - Fully documented & Typehinted
 - Caching & Ratelimiting handled
-- 100% tested
 
-The documentation can be found [here](https://pyaww-docs.vercel.app/).
+We strive to provide an easy to use, batteries included, modernic API wrapper. The documentation can be found [here](https://pyaww-docs.vercel.app/), 
+for help please open an [issue](https://github.com/ammarsys/pyaww/issues).
 
-# Quick-start
+# Installation
 
-The required Python version for this module is `3.9` or above. This is as of `0.0.4`, versions below support `3.6+`.
+> The required Python version for the module is `3.9` or above.
 
-
-```py
+```
 # Linux/MacOS
 python3 -m pip install pyaww
 
@@ -35,79 +33,21 @@ python3 -m pip install pyaww
 py -m pip install pyaww
 ```
 
-For the development version do,
-```
-git clone https://github.com/ammarsys/pyaww/tree/dev
-cd pyaww
-```
+# Quick Example
 
-Mini example,
-
+To use this module, you first have to create an API key over [here](https://www.pythonanywhere.com/account/#api_token). 
+After you've done that, copy the credentials and provide them to the `pyaww.user.User` class. It is advised that you do 
+*not* make your token public within the code, instead, you should store it [securely](https://stackoverflow.com/questions/41546883/what-is-the-use-of-python-dotenv) 
+using a package like `python-dotenv`.
 ```py
-# import the module
 from pyaww.user import User
 
 # construct the user class
-client = User(auth='...', username='...')
+client: User = User(auth='TOKEN_GOES_HERE', username='USERNAME_GOES_HERE')
 
-for console in client.consoles():
-    print(console.name)
-```
+def cpu() -> dict:
+    """Gets the CPU information."""
+    return client.get_cpu_info()
 
-There are more examples in the `repices` directory.
-
-<div align="center">
-
-# Frequently Asked Questions
-
-</div>
-
-**Q: How do I get my accounts API token?**
-
-**A:** Head over to https://www.pythonanywhere.com/account/#api_token, and you should be able to find it.
-
-<hr>
-
-**Q: I have an issue, where can I receive help?**
-
-**A:** Please open an issue over [here](https://github.com/ammarsys/pyaww/issues).
-
-<hr>
-
-**Q: How do I contribute?**
-
-**A:** We have a guide for that, please see `CONTRIBUTING.MD` in this repository.
-
-<hr>
-
-**Q: How to use this module in an async environment?**
-
-**A:** Look into [this](https://pypi.org/project/aioify/) library.
-
-<hr>
-
-
-**Q: How to manually construct a class?**
-
-We know that the class variables for a console (taken from the docs) are:
-
-- id
-- user
-- executable
-- arguments
-- working_directory
-- name
-- console_url
-- console_frame_url
-
-So we can do:
-
-```python
-from pyaww.user import Console, User
-
-console = Console(resp={
-    'id': ..., 
-    'user': ..., 
-    'executable': ...
-}, user=User(...)) # and the other stuff
+print(cpu())
 ```
