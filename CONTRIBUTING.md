@@ -4,15 +4,29 @@ First, thanks for taking the time to contribute! ❤️ All contributions are we
 
 ## Contributing
 
-1. [Create issue and assign it to yourself](https://github.com/ammarsys/pyaww/issues).
-2. Fork the repository or make a new branch.
-3. Make your changes.
-4. [Create a PR](https://github.com/ammarsys/pyaww/issues/pulls).
-   with a good description on the changes you've made.
+1. [Create an issue and assign it to yourself](https://github.com/ammarsys/pyaww/issues).
+2. Fork the repository.
+3. Locally clone your fork,
+
+```
+git clone https://github.com/yourname/pyaww
+cd pyaww
+```
+
+4. Commit your changes, 
+
+```
+git add pyaww/user.py
+git commit -m "[adds] Something!"
+```
+
+5. Push your changes `git push -u origin branch`.
+6. [Create a PR](https://github.com/ammarsys/pyaww/issues/pulls),
+with a good description on the changes you've made.
 
 ## General Guidelines
 
-- Follow `PEP8` rules.
+- Follow the `PEP8` rules.
 - Use [Google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) docstrings.
 - You must format your code using [black](https://pypi.org/project/black/).
 - You must sort imports using [isort](https://pypi.org/project/isort/).
@@ -22,8 +36,8 @@ First, thanks for taking the time to contribute! ❤️ All contributions are we
 
 ## How to run the tests?
 
-- Install `pytest` library if you don't have it via `py -m pip install pytest`.
-- Navigate to `pyaww/tests/assets` and create `settings.json`. It should contain:
+1. Install `pytest` library if you don't have it via `py -m pip install pytest`.
+2. Navigate to `pyaww/tests/assets` and create `settings.json`. It should contain:
 ```json
 {
   "USERNAME": "YOUR_NAME",
@@ -31,10 +45,13 @@ First, thanks for taking the time to contribute! ❤️ All contributions are we
   "STARTED_CONSOLE": 123
 }
 ```
-- Ensure your CWD is `pyaww` and not `pyaww/tests` or similar.
-- Run `py -m pytest -v -s`.
-- Fix if anything is wrong, if not, your tests are fine.
+3. Ensure your CWD is `pyaww` and not `pyaww/tests` or similar.
+4. Run `py -m pytest -v -s`.
+5. Fix if anything is wrong, if not, your tests are fine.
 
 ## What is currently our TODO?
-- Better caching, specifically, caching inside instances that `pyaww.user.User` returns.
-- Ratelimit handling, 40/minute for everything exception being console inputs where it is 120/min.
+
+- Better caching, cache submodules, Thread safe caching...
+- Ratelimit handling, 40/minute for everything except console inputs where it is 120/min.
+- Making the `README.md` pretty.
+- Making the documentations good.
