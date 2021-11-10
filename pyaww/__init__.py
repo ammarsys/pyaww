@@ -7,6 +7,7 @@ from pyaww import (
     static_file,
     user,
     webapp,
+    errors
 )
 
 __version__ = "0.0.4"
