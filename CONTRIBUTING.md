@@ -45,6 +45,10 @@ with a good description on the changes you've made.
   "STARTED_CONSOLE": 123
 }
 ```
+
+To properly test the module, use a "fresh account". Just create an alternative account, make & start a console and 
+you're good to go!
+
 3. Ensure your CWD is `pyaww` and not `pyaww/tests` or similar.
 4. Run `py -m pytest -v -s`.
 5. Fix if anything is wrong, if not, your tests are fine.
