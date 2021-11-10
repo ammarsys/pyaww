@@ -1,18 +1,25 @@
 """Helper functions for the API wrapper"""
 
 # Standard library imports
+
 import datetime
+
 from functools import wraps
 from typing import Any, Iterator, TypeVar, Callable
 
 # Related third party imports
+
 from typing_extensions import ParamSpec
+
+# Local application/library specific imports
+
+# from pyaww.errors import raise_error
 
 T = TypeVar("T")
 P = ParamSpec("P")
 
+
 cache = {}
-ratelimit = {}
 
 
 def flatten(items: Any) -> Iterator:
@@ -53,23 +60,26 @@ def cache_func(seconds: int = 300) -> Callable:
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             """The wrapper"""
-            if func.__name__ not in cache:
-                cache[func.__name__] = [None, None]
 
-            cached_dict_value = cache[func.__name__]
+            if not args[0].use_cache:
+                return func(*args, **kwargs)
 
-            if (
-                cached_dict_value[0] is not None
-                and datetime.datetime.now() <= cached_dict_value[1]
-            ):
-                return cached_dict_value[0]
+            if (func.__qualname__, (args, tuple(kwargs.items()))) not in cache:
+                ret = func(*args, **kwargs)
 
-            ret = func(*args, **kwargs)
-            cache[func.__name__] = [
-                ret,
-                datetime.datetime.now() + datetime.timedelta(seconds=seconds),
+                cache[(func.__qualname__, (args, tuple(kwargs.items())))] = [
+                    ret,
+                    datetime.datetime.now() + datetime.timedelta(seconds=seconds),
+                ]
+
+                return ret
+
+            cached_dict_value = cache[
+                (func.__qualname__, (args, tuple(kwargs.items())))
             ]
-            return ret
+
+            if cached_dict_value[1] >= datetime.datetime.now():
+                return cached_dict_value[0]
 
         return wrapper
 
