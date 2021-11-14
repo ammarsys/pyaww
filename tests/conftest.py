@@ -20,8 +20,7 @@ import pytest
 
 # Local library/libraary specific imports
 
-from pyaww.user import User, File, Console, SchedTask, WebApp
-from pyaww.static_file import StaticFile, StaticHeader
+from pyaww import User, File, Console, SchedTask, WebApp, StaticFile, StaticHeader
 from pyaww.errors import PythonAnywhereError
 
 with open(r"tests/assets/settings.json", "r") as f:
