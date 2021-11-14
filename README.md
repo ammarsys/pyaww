@@ -11,14 +11,14 @@
 
 # Overview
 
-An API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper. The key-feautures are,
+An API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper. The key-features are,
 
 - 100% API coverage, 100% tested
 - Object-oriented
 - Fully documented & Typehinted
 - Caching & Ratelimiting handled
 
-We strive to provide an easy to use, batteries included, modernic API wrapper. The documentation can be found [here](https://pyaww-docs.vercel.app/), 
+We strive to provide an easy-to-use, batteries included modern API wrapper. The documentation can be found [here](https://pyaww-docs.vercel.app/), 
 for help please open an [issue](https://github.com/ammarsys/pyaww/issues).
 
 # Installation
