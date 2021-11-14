@@ -1,11 +1,3 @@
-"""
-A lightweight API wrapper around the PythonAnywhere's API.
-
-The documentations are located at https://ammarsys.github.io/pyaww-docs/
-
-License: MIT
-"""
-
 # Standard library imports
 
 import json
@@ -16,13 +8,14 @@ from typing import Iterator, Optional, TextIO
 import requests
 
 # Local application/library specific imports
+
 from .console import Console
 from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
 from .errors import raise_error
-from utils.utils import cache_func, update_cached_function
+from utils import cache_func
 
 
 class User:
@@ -35,9 +28,13 @@ class User:
             auth (str): API token of the account
             from_eu (bool): Whether you are from europe or not, because European accounts API URL is different
         """
+        self.use_cache = True
+        self.cache = {}
+
         self.from_eu = from_eu
         self.username = username
         self.token = auth
+
         self.session = requests.Session()
         self.headers = {"Authorization": f"Token {self.token}"}
         self.request_url = (
@@ -214,7 +211,6 @@ class User:
         """List students of the user."""
         return self.request("GET", f"/api/v0/user/{self.username}/students/").json()
 
-    @update_cached_function(corresponding_function="students")
     def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
         self.request("DELETE", f"/api/v0/user/{self.username}/students/{student}")
@@ -331,7 +327,6 @@ class User:
             ).json(),
         ]
 
-    @update_cached_function(corresponding_function="python_versions")
     def set_python_version(self, version: float, command: str) -> None:
         """
         Set default python version.
@@ -359,7 +354,6 @@ class User:
         """
         return self.request("GET", f"/api/v0/user/{self.username}/system_image/").json()
 
-    @update_cached_function(corresponding_function="get_system_image")
     def set_system_image(self, system_image: str) -> None:
         """
         Set the system image. Please see https://help.pythonanywhere.com/pages/ChangingSystemImage for the table.
@@ -386,7 +380,6 @@ class User:
         resp = self.request("GET", f"/api/v0/user/{self.username}/webapps/").json()
         return [WebApp(i, self) for i in resp]
 
-    @update_cached_function(corresponding_function="webapps")
     def create_webapp(self, domain_name: str, python_version: str) -> WebApp:
         """
         Creata a webapp.
