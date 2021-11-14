@@ -1,6 +1,7 @@
 # Standard library imports
 
 import json
+
 from typing import Iterator, Optional, TextIO
 
 # Related third party imports
@@ -14,6 +15,8 @@ from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
+from .types import cache_type
+
 from .errors import raise_error
 from utils import cache_func
 
@@ -29,7 +32,7 @@ class User:
             from_eu (bool): Whether you are from europe or not, because European accounts API URL is different
         """
         self.use_cache = True
-        self.cache = {}
+        self.cache: cache_type = {}
 
         self.from_eu = from_eu
         self.username = username
