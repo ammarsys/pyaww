@@ -40,7 +40,7 @@ After you've done that, copy the credentials and provide them to the `pyaww.user
 *not* make your token public within the code, instead, you should store it [securely](https://stackoverflow.com/questions/41546883/what-is-the-use-of-python-dotenv) 
 using a package like `python-dotenv`.
 ```py
-from pyaww.user import User
+from pyaww import User
 
 # construct the user class
 client: User = User(auth='TOKEN_GOES_HERE', username='USERNAME_GOES_HERE')
