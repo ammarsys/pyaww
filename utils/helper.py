@@ -63,6 +63,8 @@ def cache_func(seconds: int = 300) -> Callable:
             if not args[0].use_cache:
                 return func(*args, **kwargs)
 
+            try:
+                hash()
             if (func.__qualname__, (args, tuple(kwargs.items()))) not in cache:
                 ret = func(*args, **kwargs)
 
