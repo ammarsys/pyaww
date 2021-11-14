@@ -8,32 +8,43 @@ from pyaww.user import User, cache_func
 
 
 @cache_func(seconds=1)
-def foo(client: User, name: str) -> str:  # client must be here
-    return "Hello" + name + "!"
+def hello(client: User, name: str = 'Maria') -> str:  # client must be here
+    return "Hello " + name
 
 
 def test_caches(client: User) -> None:
-    foo(client, "John")
-    foo(client, name="Bob")
+    hello(client, "John")
+    hello(client, name="Bob")
+    hello(client)
 
     assert (
-        (foo.__qualname__, ((client, "John"), ())) in client.cache
-        or not (foo.__qualname__, ((client,), (("name", "Bob"),))) in client.cache
+        all(x in [(client, "John"), (client, "Bob"), (client, "Maria")] for x in client.cache[hello.__qualname__])
     ), "Function was not cached."
 
     time.sleep(1)
 
-    foo(client, "John")
-    foo(client, name="Bob")
+    hello(client, "John")
+    hello(client, name="Bob")
+    hello(client)
 
-    assert not client.cache, "Cache is not empty."
+    assert not client.cache[hello.__qualname__], "Cache is empty."
 
 
 def test_correct_output(client: User) -> None:
-    original = foo(client, "Martin")
+    original = hello(client, "Martin")
 
-    assert (foo.__qualname__, ((client, "Martin"), ())) in client.cache, "Function was not cached."
+    assert (client, "Martin") in client.cache[hello.__qualname__]
 
-    cached = foo(client, "Martin")
+    cached = hello(client, "Martin")
 
     assert original == cached
+
+
+def test_global_settings(client: User) -> None:
+    client.use_cache = False
+    hello(client, "Jennifer")
+    assert (client, "Jennifer") not in client.cache[hello.__qualname__]
+
+    client.use_cache = True
+    hello(client, "Jennifer")
+    assert(client, "Jennifer") in client.cache[hello.__qualname__]
