@@ -19,9 +19,6 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 
-cache = {}
-
-
 def flatten(items: Any) -> Iterator:
     """
     A function to "completely" flatten a list. For example, itertools.chain() would flatten it once but with recursion
@@ -61,6 +58,8 @@ def cache_func(seconds: int = 300) -> Callable:
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             """The wrapper"""
 
+            cache = args[0].cache
+
             if not args[0].use_cache:
                 return func(*args, **kwargs)
 
@@ -81,29 +80,7 @@ def cache_func(seconds: int = 300) -> Callable:
             if cached_dict_value[1] >= datetime.datetime.now():
                 return cached_dict_value[0]
 
-        return wrapper
-
-    return real_decorator
-
-
-def update_cached_function(corresponding_function: str) -> Callable:
-    """
-    Update a cached function and next time it's ran ensure it's not of cache and up-to-date.
-
-    Args:
-        corresponding_function (str): corresponding function to update
-
-    Returns:
-        Callable
-    """
-
-    def real_decorator(func: Callable[P, T]) -> Callable[P, T]:
-        """The actual decorator"""
-
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            """The wrapper"""
-            cache[corresponding_function] = [None, None]
-            return func(*args, **kwargs)
+            del cache[(func.__qualname__, (args, tuple(kwargs.items())))]  # expired
 
         return wrapper
 
