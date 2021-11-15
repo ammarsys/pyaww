@@ -105,7 +105,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-tests/assets/settings.json
+tests/assets/.env
 .venv
 env/
 venv/
