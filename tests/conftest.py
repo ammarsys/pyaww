@@ -6,12 +6,12 @@ PyAwws test file. To properly test the module, use a "fresh account". Some guidl
 - no scheduled & always_on tasks
 - glastonbury image must be available
 
-Basically, create an account, start a console, fill out settings.json.
+Basically, create an account, start a console, fill out the env file.
 """
 
 # Standard library imports
 
-import json
+import os
 from typing import Iterator
 
 # Related third party imports
@@ -21,14 +21,14 @@ import pytest
 # Local library/libraary specific imports
 
 from pyaww import User, File, Console, SchedTask, WebApp, StaticFile, StaticHeader
+from dotenv import load_dotenv
 from pyaww.errors import PythonAnywhereError
 
-with open(r"tests/assets/settings.json", "r") as f:
-    data = json.load(f)
+load_dotenv('tests/assets/.env')
 
-USERNAME = data["USERNAME"]
-AUTH = data["AUTH"]
-STARTED_CONSOLE = data["STARTED_CONSOLE"]
+USERNAME = os.getenv("USERNAME")
+AUTH = os.getenv("AUTH")
+STARTED_CONSOLE = os.getenv("STARTED_CONSOLE")
 
 TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/"
 TEST_PATH_FOR_NEW_FILE = f"/home/{USERNAME}/pyaww_test_data.txt"
