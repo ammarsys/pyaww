@@ -37,13 +37,11 @@ with a good description on the changes you've made.
 ## How to run the tests?
 
 1. Install `pytest` library if you don't have it via `py -m pip install pytest`.
-2. Navigate to `pyaww/tests/assets` and create `settings.json`. It should contain:
-```json
-{
-  "USERNAME": "YOUR_NAME",
-  "AUTH": "YOUR_TOKEN",
-  "STARTED_CONSOLE": 123
-}
+2. Navigate to `pyaww/tests/assets` and create `.env`. It should contain:
+```dotenv
+USERNAME=USERNAME
+AUTH=TOKEN
+STARTED_CONSOLE=ID
 ```
 
 To properly test the module, use a "fresh account". Just create an alternative account, make & start a console and 
