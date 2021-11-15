@@ -1,12 +1,3 @@
-"""
-PyAwws test file. To properly test the module, use a "fresh account". This means:
-
-- one pre-started console
-- no webapps
-- no scheduled & always_on tasks
-- available "glastonbury" system image
-"""
-
 # Standard library imports
 
 from typing import Iterator
