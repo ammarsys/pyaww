@@ -8,6 +8,7 @@ import inspect
 from functools import wraps
 from typing import TypeVar, Callable, Any, Union, Optional
 from dataclasses import dataclass
+from collections.abc import Mapping
 
 # Related third party imports
 
@@ -26,7 +27,7 @@ class CachedRecord:
     ret: Any
 
 
-class FunctionCache:
+class FunctionCache(Mapping):
     """
     TTL cache for functions. This class must be used inside a regular dictionary in the following style,
 
@@ -37,8 +38,9 @@ class FunctionCache:
     see if the timedelta in the future is less than now, if it is, meaning its expired, pop the value and raise a
     KeyError. Instances other than CachedRecord are ignored.
     """
-    def __init__(self, name: str, to_cache: tuple = None):
+    def __init__(self, name: str, max_len: Union[float, int], to_cache: tuple = None):
         self.name = name
+        self.max_len = max_len
         self.cache: dict[tuple, CachedRecord] = {}
 
         if to_cache:
@@ -68,10 +70,23 @@ class FunctionCache:
         return False
 
     def __setitem__(self, key, value):
+        if len(self.cache) > self.max_len:  # max values and/or old values
+            self.cache.pop(list(self.cache)[0])
+
         self.cache[key] = value
 
+    def __len__(self):
+        return len(self.cache)
 
-def cache_func(seconds: Union[int, float] = 300) -> Callable:
+    def __iter__(self):
+        for x in self.cache:
+            yield x
+
+
+def cache_func(
+        seconds: Union[int, float] = 300,
+        max_len: Union[int, float] = float('inf')
+) -> Callable:
     """
     Cache functions. Cache time is 5 minutes by default.
 
@@ -98,6 +113,7 @@ def cache_func(seconds: Union[int, float] = 300) -> Callable:
         >>> obj.bar(1)  # now cached
 
     Args:
+        max_len (Union[float, int] = float('inf')): maximum number of cached records
         seconds (Union[int, float]): TTL for the cached version of the function
 
     Returns:
@@ -132,8 +148,9 @@ def cache_func(seconds: Union[int, float] = 300) -> Callable:
             else:
                 ret = func(*args, **kwargs)
                 cache[func.__qualname__] = FunctionCache(
-                    func.__qualname__,
+                    name=func.__qualname__,
                     to_cache=(params, CachedRecord(params, time_, ret)),
+                    max_len=max_len
                 )
                 return ret
 
