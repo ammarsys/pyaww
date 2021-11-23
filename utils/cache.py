@@ -22,6 +22,7 @@ P = ParamSpec("P")
 @dataclass(frozen=True, eq=True)
 class CachedRecord:
     """Cache records; used for utils.cache.FunctionCache and utils.cache.cache_func"""
+
     params: tuple
     future: datetime.datetime
     ret: Any
@@ -38,7 +39,10 @@ class FunctionCache(Mapping):
     see if the timedelta in the future is less than now, if it is, meaning its expired, pop the value and raise a
     KeyError. Instances other than CachedRecord are ignored.
     """
-    def __init__(self, name: str, max_len: Union[float, int], to_cache: tuple = None):
+
+    def __init__(
+        self, name: str, max_len: Union[float, int], to_cache: tuple = None
+    ):  # No need to default max_len since it gets passed from utils.cache.cache_func and it's defaulted there.
         self.name = name
         self.max_len = max_len
         self.cache: dict[tuple, CachedRecord] = {}
@@ -79,13 +83,11 @@ class FunctionCache(Mapping):
         return len(self.cache)
 
     def __iter__(self):
-        for x in self.cache:
-            yield x
+        yield from self.cache
 
 
 def cache_func(
-        seconds: Union[int, float] = 300,
-        max_len: Union[int, float] = float('inf')
+    seconds: Union[int, float] = 300, max_len: Union[int, float] = float("inf")
 ) -> Callable:
     """
     Cache functions. Cache time is 5 minutes by default.
@@ -150,7 +152,7 @@ def cache_func(
                 cache[func.__qualname__] = FunctionCache(
                     name=func.__qualname__,
                     to_cache=(params, CachedRecord(params, time_, ret)),
-                    max_len=max_len
+                    max_len=max_len,
                 )
                 return ret
 
