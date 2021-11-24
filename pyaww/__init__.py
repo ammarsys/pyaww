@@ -13,4 +13,7 @@ from pyaww.static_header import StaticHeader
 from pyaww.errors import *
 from pyaww.types import *
 
+# noinspection PyUnresolvedReferences
+from utils.cache import CachedRecord, cache_func
+
 __version__ = "0.0.4"
