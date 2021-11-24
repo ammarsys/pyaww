@@ -33,6 +33,7 @@ class User:
         """
         self.use_cache = True
         self.cache: cache_type = {}
+        self.disable_cache = ()
 
         self.from_eu = from_eu
         self.username = username
