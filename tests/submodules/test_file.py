@@ -1,7 +1,3 @@
-# Related third party imports
-
-import pytest
-
 # Local application/library specific imports
 
 from pyaww.user import File
