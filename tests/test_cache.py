@@ -83,4 +83,3 @@ def test_max_len(client: User) -> None:
     hello(client, 'Jenny')
 
     assert not ((client, 'Mark') in client.cache['hello']) and len(client.cache['hello']) == 5
-
