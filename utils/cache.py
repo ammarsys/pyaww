@@ -52,7 +52,7 @@ class FunctionCache(Mapping):
 
     def __check_if_expired(self, item: CachedRecord) -> Optional[None]:
         """Method to see if a key has expired, private because it can mess with caching."""
-        if item.future < datetime.datetime.now():
+        if item.future <= datetime.datetime.now():
             self.cache.pop(item.params)
             raise KeyError
 
@@ -60,8 +60,9 @@ class FunctionCache(Mapping):
         item = self.cache[item]
 
         if isinstance(item, CachedRecord):
-            if not self.__check_if_expired(item):
-                return item
+            self.__check_if_expired(item)
+
+        return item
 
     def __contains__(self, item):
         try:
@@ -74,7 +75,7 @@ class FunctionCache(Mapping):
         return False
 
     def __setitem__(self, key, value):
-        if len(self.cache) > self.max_len:  # max values and/or old values
+        if len(self.cache) >= self.max_len:  # max values and/or old values
             self.cache.pop(list(self.cache)[0])
 
         self.cache[key] = value
