@@ -20,15 +20,14 @@ import pytest
 
 # Local library/libraary specific imports
 
-from pyaww import User, File, Console, SchedTask, WebApp, StaticFile, StaticHeader
-from dotenv import load_dotenv
-from pyaww.errors import PythonAnywhereError
+from pyaww import User, File, Console, SchedTask, WebApp, StaticFile, StaticHeader, PythonAnywhereError
+from dotenv import dotenv_values
 
-load_dotenv("tests/assets/.env")
+values = dotenv_values("tests/assets/.env")
 
-USERNAME = os.getenv("USERNAME")
-AUTH = os.getenv("AUTH")
-STARTED_CONSOLE = os.getenv("STARTED_CONSOLE")
+USERNAME = values["USERNAME"]
+AUTH = values["AUTH"]
+STARTED_CONSOLE = values["STARTED_CONSOLE"]
 
 TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/"
 TEST_PATH_FOR_NEW_FILE = f"/home/{USERNAME}/pyaww_test_data.txt"
