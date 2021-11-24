@@ -24,7 +24,7 @@ from pyaww import User, File, Console, SchedTask, WebApp, StaticFile, StaticHead
 from dotenv import load_dotenv
 from pyaww.errors import PythonAnywhereError
 
-load_dotenv('tests/assets/.env')
+load_dotenv("tests/assets/.env")
 
 USERNAME = os.getenv("USERNAME")
 AUTH = os.getenv("AUTH")
