@@ -9,8 +9,7 @@ import pytest
 
 # Local application/library specific imports
 
-from pyaww.user import User
-from pyaww.errors import InvalidInfo
+from pyaww import User, InvalidInfo
 
 
 def test_bad_client_token() -> None:

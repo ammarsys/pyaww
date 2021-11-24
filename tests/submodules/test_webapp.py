@@ -1,7 +1,6 @@
 # Local application/library specific imports
 
-from pyaww.user import WebApp, User
-from pyaww.webapp import StaticFile, StaticHeader
+from pyaww import WebApp, User, StaticFile, StaticHeader
 
 
 # No seperate files for static files and headers to simplify cleanup.

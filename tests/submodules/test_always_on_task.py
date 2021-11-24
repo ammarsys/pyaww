@@ -1,6 +1,6 @@
 # Local application/library specific imports
 
-from pyaww.user import AlwaysOnTask, User
+from pyaww import AlwaysOnTask, User
 
 
 def test_restart(always_on_task: AlwaysOnTask) -> None:

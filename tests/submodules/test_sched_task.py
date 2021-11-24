@@ -1,6 +1,6 @@
 # Local application/library specific imports
 
-from pyaww.user import SchedTask, User
+from pyaww import SchedTask, User
 
 
 def test_update(scheduled_task: SchedTask) -> None:

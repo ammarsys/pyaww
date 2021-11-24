@@ -1,6 +1,6 @@
 # Local application/library specific imports
 
-from pyaww.user import Console
+from pyaww import Console
 
 
 def test_send_input(

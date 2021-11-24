@@ -1,6 +1,6 @@
 # Local application/library specific imports
 
-from pyaww.user import File
+from pyaww import File
 
 
 def test_share(file: File) -> None:
