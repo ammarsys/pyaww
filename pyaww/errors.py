@@ -1,8 +1,6 @@
-"""Errors for the module"""
-
 # Standard library imports
 
-from typing import Any, Dict, NoReturn, Tuple
+from typing import NoReturn
 
 
 class PythonAnywhereError(Exception):
@@ -21,7 +19,7 @@ class NotFound(InvalidInfo):
     """Exception for handling 404's."""
 
 
-ERRORS_DICT: Dict[Tuple[int, str], PythonAnywhereError] = {
+ERRORS_DICT: dict[tuple[int, str], PythonAnywhereError] = {
     (401, "Invalid token."): InvalidInfo(
         "Bad token provided, please check it at https://www.pythonanywhere.com/account/#api_token",
         401,
@@ -30,7 +28,7 @@ ERRORS_DICT: Dict[Tuple[int, str], PythonAnywhereError] = {
 }
 
 
-def raise_error(data: Tuple[int, str]) -> NoReturn:
+def raise_error(data: tuple[int, str]) -> NoReturn:
     """
     Raise an appropriate error based on the response
 

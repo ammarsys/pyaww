@@ -20,7 +20,16 @@ import pytest
 
 # Local library/libraary specific imports
 
-from pyaww import User, File, Console, SchedTask, WebApp, StaticFile, StaticHeader, PythonAnywhereError
+from pyaww import (
+    User,
+    File,
+    Console,
+    SchedTask,
+    WebApp,
+    StaticFile,
+    StaticHeader,
+    PythonAnywhereError,
+)
 from dotenv import dotenv_values
 
 values = dotenv_values("tests/assets/.env")
