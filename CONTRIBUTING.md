@@ -17,8 +17,10 @@ cd pyaww
 
 ```
 git add pyaww/user.py
-git commit -m "[adds] Something!"
+git commit -m "[feat] add support for x in method y"
 ```
+
+Please look at the [following](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) git guide for commits.
 
 5. Push your changes `git push -u origin branch`.
 6. [Create a PR](https://github.com/ammarsys/pyaww/issues/pulls),
@@ -53,7 +55,28 @@ you're good to go!
 
 ## What is currently our TODO?
 
-- Better caching, cache submodules, Thread safe caching...
-- Ratelimit handling, 40/minute for everything except console inputs where it is 120/min.
-- Making the `README.md` pretty.
-- Making the documentations good.
+#### Making the documentations good.
+- The automatically generated documentations using `pdoc3` aren't the best because of lacking information
+in module-level and class-level docstrings.
+
+
+### Better caching
+- ~~TTL cache ...~~ 
+- Caching methods outside `pyaww.User`, specifically the submodules
+- an `update_cache` function that updates the cache. A MVP would probably accept string-like options, 
+`WIPE`, `ADD_TO_CACHE`, etc. The `WIPE` option for example would be a value for a parameter in a decorator, 
+sample use-case is, 
+```py
+@cache_func
+def get_console_by_id(...) -> ...:
+    ...
+
+@update_cache(func='User.get_console_by_id', mode='ADD_TO_CACHE', identifier="Console.id")
+def create_console(...) -> ...
+    ...
+```
+or if you can propose a better idea.
+
+### Ratelimiting
+- 40/minute for everything except console inputs where it is 120/min
+- decorator style
