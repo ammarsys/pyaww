@@ -1,5 +1,3 @@
-"""Class for the file API endpoints"""
-
 # Standard library imports
 
 from typing import TYPE_CHECKING, TextIO
@@ -13,7 +11,11 @@ if TYPE_CHECKING:
 
 
 class File:
-    """All methods related to a File"""
+    """
+    Implements File endpoints.
+
+    See Also https://www.pythonanywhere.com/files/
+    """
 
     def __init__(self, path: str, user: "User") -> None:
         self.path = path

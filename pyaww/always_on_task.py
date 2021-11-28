@@ -1,5 +1,3 @@
-"""Class for the always on tasks API endpoints"""
-
 # Standard library imports
 
 from typing import TYPE_CHECKING
@@ -13,7 +11,11 @@ if TYPE_CHECKING:
 
 
 class AlwaysOnTask(SchedTask):
-    """Inherits sheduled task."""
+    """
+    Implements AlwaysOnTask endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/AlwaysOnTasks/
+    """
 
     def __init__(self, resp: dict, user: "User") -> None:
         super().__init__(resp, user)

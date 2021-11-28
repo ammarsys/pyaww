@@ -1,5 +1,3 @@
-"""Class for webapp API endpoints"""
-
 # Standard library imports
 
 from typing import TYPE_CHECKING
@@ -15,7 +13,16 @@ if TYPE_CHECKING:
 
 
 class WebApp:
-    """Contains all methods of a webapp."""
+    """
+    Implements WebApp endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/WebAppBasics/
+
+    Constructors:
+        `WebApp.static_files`;`WebApp.create_static_file`;`WebApp.get_static_file_by_id` -> **StaticFile**
+
+        `WebApp.static_headers`;`WebApp.create_static_header`;`WebApp.get_static_header_by_id` -> **StaicHeader**
+    """
 
     id: int
     user: str
@@ -32,14 +39,14 @@ class WebApp:
         vars(self).update(resp)
 
     def delete(self) -> None:
-        """Deletes a webapp."""
+        """Deletes the webapp."""
         self._user.request(
             "DELETE", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/"
         )
 
     def update(self, **kwargs) -> None:
         """
-        Updates config of a webapp. Reload required.
+        Updates config of the webapp. Reload required.
 
         Args:
             **kwargs: can take: python_version, source_directory, virtualenv_path, force_https,
@@ -95,7 +102,7 @@ class WebApp:
         ).json()
 
     def static_files(self) -> list[StaticFile]:
-        """Gets webapps static files."""
+        """Gets the webapps static files."""
         resp = self._user.request(
             "GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/"
         ).json()
@@ -174,7 +181,7 @@ class WebApp:
 
     @property
     def userclass(self):
-        """Property for accessing a protected member so it doesn't violate PEP8"""
+        """Property for accessing pyaww.User"""
         return self._user
 
     def __str__(self):

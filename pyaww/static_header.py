@@ -1,5 +1,3 @@
-"""Class for the console API endpoints"""
-
 # Standard library imports
 
 from typing import TYPE_CHECKING
@@ -11,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class StaticHeader:
-    """Contains all relevant methods to a static header."""
+    """Implements StaticHeader endpoints."""
 
     id: int
     url: str

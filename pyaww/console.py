@@ -1,5 +1,3 @@
-"""Class for the console API endpoints"""
-
 # Standard library imports
 
 from typing import TYPE_CHECKING
@@ -11,7 +9,11 @@ if TYPE_CHECKING:
 
 
 class Console:
-    """All methods of a console."""
+    """
+    Implements Console endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/TypesOfConsoles/
+    """
 
     id: int
     user: "User"
@@ -54,7 +56,7 @@ class Console:
         self._user.request("DELETE", "/api/v0" + self.console_url)
 
     def outputs(self) -> str:
-        """Return all outputs in a console."""
+        """Return all outputs in the console."""
         resp = self._user.request(
             "GET", "/api/v0" + self.console_url + "get_latest_output/"
         ).json()

@@ -1,5 +1,3 @@
-"""Class for the static file(s) API endpoints"""
-
 # Standard library imports
 
 from typing import TYPE_CHECKING
@@ -13,7 +11,11 @@ if TYPE_CHECKING:
 
 
 class StaticFile(StaticHeader):
-    """A static file is a file that can be served much faster of disk. Accesed via URL."""
+    """
+    Implements StaticFile endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/DjangoStaticFiles/
+    """
 
     id: int
     url: str

@@ -1,6 +1,5 @@
-"""Class for the scheduled tasks API endpoints"""
-
 # Standard library imports
+
 from typing import TYPE_CHECKING
 
 # Local application/library specific imports
@@ -10,7 +9,11 @@ if TYPE_CHECKING:
 
 
 class SchedTask:
-    """A command that gets executed on a scheduled time, can be hourly or daily."""
+    """
+    Implements ScheduledTask endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/ScheduledTasks/
+    """
 
     id: int
     url: str

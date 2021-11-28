@@ -16,13 +16,25 @@ from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
 from .types import cache_type
-
 from .errors import raise_error
-from utils import cache_func
+from .utils import cache_func
 
 
 class User:
-    """The brain of the operation. All modules are connected to this class in one way or another."""
+    """
+    The brain of the operation. All modules are connected to this class in one way or another.
+
+    Constructors:
+        `User.create_console`;`User.get_console_by_id`;`User.consoles()`  -> **Console**
+
+        `User.get_file_by_path`;`User.create_file` -> **File**
+
+        `User.tasks`;`User.get_sched_task_by_id`;`User.create_sched_task` -> **SchedTask**
+
+        `User.tasks`;`User.create_always_on_task`;`User.get_always_on_task_by_id` -> **AlwaysOnTask**
+
+        `User.get_webapp_by_domain_name`;`User.webapps`;`User.create_webapp` -> **WebApp**
+    """
 
     def __init__(self, username: str, auth: str, from_eu: bool = False) -> None:
         """
