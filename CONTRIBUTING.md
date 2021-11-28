@@ -53,11 +53,10 @@ you're good to go!
 4. Run `py -m pytest -v -s`.
 5. Fix if anything is wrong, if not, your tests are fine.
 
-## What is currently our TODO?
+## What is currently our TODO for 0.0.4 version?
 
 #### Making the documentations good.
-- The automatically generated documentations using `pdoc3` aren't the best because of lacking information
-in module-level and class-level docstrings.
+- ~~The automatically ...~~
 
 
 ### Better caching
