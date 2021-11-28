@@ -62,17 +62,19 @@ in module-level and class-level docstrings.
 
 ### Better caching
 - ~~TTL cache ...~~ 
+- Thread safe caching with `threading.RLock`
 - Caching methods outside `pyaww.User`, specifically the submodules
 - an `update_cache` function that updates the cache. A MVP would probably accept string-like options, 
 `WIPE`, `ADD_TO_CACHE`, etc. The `WIPE` option for example would be a value for a parameter in a decorator, 
 sample use-case is, 
 ```py
 @cache_func
-def get_console_by_id(...) -> ...:
+def consoles() -> list:
     ...
 
-@update_cache(func='User.get_console_by_id', mode='ADD_TO_CACHE', identifier="Console.id")
-def create_console(...) -> ...
+@update_cache(func='User.get_console_by_id', mode='ADD_TO_CACHE', identifier="RETURN")
+def create_console(...) -> Console:
+    """Once a console is created, it'll be added to the cache of User.consoles."""
     ...
 ```
 or if you can propose a better idea.
