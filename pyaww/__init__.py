@@ -13,6 +13,6 @@ from pyaww.static_header import StaticHeader
 from pyaww.errors import *
 from pyaww.types import *
 
-from pyaww.utils.cache import CachedRecord, cache_func
+from pyaww.utils.cache import CachedRecord, cache_func, FunctionCache
 
 __version__ = "0.0.4"
