@@ -11,8 +11,8 @@ Basically, create an account, start a console, fill out the env file.
 
 # Standard library imports
 
-import os
-from typing import Iterator
+import asyncio
+from typing import AsyncIterator
 
 # Related third party imports
 
@@ -45,10 +45,19 @@ TEST_RELATIVE_PATH_TO_FILE = r"tests/assets/data.txt"
 TEST_STUDENT_TO_REMOVE = "ANYTHING_HERE"
 
 
+@pytest.fixture(scope='session')
+def event_loop():
+    # It's safe to ignore these warnings.
+
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+
 @pytest.fixture(scope="session")
-def webapp(client: User) -> WebApp:
+async def webapp(client: User) -> WebApp:
     """Construct a webapp"""
-    return client.create_webapp(
+    return await client.create_webapp(
         domain_name=f"{USERNAME}.pythonanywhere.com", python_version="python39"
     )
 
@@ -60,46 +69,46 @@ def client() -> User:
 
 
 @pytest.fixture
-def unstarted_console(client) -> Console:
+async def unstarted_console(client) -> Console:
     """Create an unstarted console, this means you cannot send input to it"""
-    return client.create_console(executable="bash")
+    return await client.create_console(executable="bash")
 
 
 @pytest.fixture
-def started_console(client) -> Console:
+async def started_console(client) -> Console:
     """Get a started console"""
-    return client.get_console_by_id(id_=STARTED_CONSOLE)
+    return await client.get_console_by_id(id_=int(STARTED_CONSOLE))
 
 
 @pytest.fixture
-def contents_of_a_path(client) -> Iterator[str]:
+async def contents_of_a_path(client) -> AsyncIterator[str]:
     """Recursively go through paths subdirs, aka listdir"""
     return client.listdir(TEST_PATH_TO_LISTDIR, recursive=True)
 
 
 @pytest.fixture
-def file(client: User) -> File:
+async def file(client: User) -> File:
     with open(TEST_RELATIVE_PATH_TO_FILE, "r") as file:
-        return client.create_file(TEST_PATH_FOR_NEW_FILE, file)
+        return await client.create_file(TEST_PATH_FOR_NEW_FILE, file)
 
 
 @pytest.fixture
-def student_name() -> str:
+async def student_name() -> str:
     """Return a student to remove"""
     return TEST_STUDENT_TO_REMOVE
 
 
 @pytest.fixture(scope="session")
-def scheduled_task(client: User) -> SchedTask:
+async def scheduled_task(client: User) -> SchedTask:
     """Create a scheduled task"""
-    return client.create_sched_task(command="echo hello world", hour="5", minute="5")
+    return await client.create_sched_task(command="echo hello world", hour="5", minute="5")
 
 
 @pytest.fixture
-def always_on_task(client: User):
+async def always_on_task(client: User):
     """Create an always_on task"""
     try:
-        return client.create_always_on_task(command="cd")
+        return await client.create_always_on_task(command="cd")
     except PythonAnywhereError:
         pytest.skip(
             "Max always_on tasks or a free account, skipping always_on task tests."
@@ -107,22 +116,22 @@ def always_on_task(client: User):
 
 
 @pytest.fixture
-def static_file(webapp: WebApp) -> StaticFile:
+async def static_file(webapp: WebApp) -> StaticFile:
     """Create a static file. Webapp restart required."""
-    static_file = webapp.create_static_file(
+    static_file = await webapp.create_static_file(
         file_path=f"/home/{USERNAME}/README.txt", url="PYAWW URL FIXTURE"
     )
-    webapp.restart()
+    await webapp.restart()
     return static_file
 
 
 @pytest.fixture(scope="session")
-def static_header(webapp: WebApp) -> StaticHeader:
+async def static_header(webapp: WebApp) -> StaticHeader:
     """Create a static file. Webapp restart required."""
-    static_file = webapp.create_static_header(
+    static_header = await webapp.create_static_header(
         value={"PYAWW KEY": "PYAWW VALUE"},
         url="PYAWW URL FIXTURE",
         name="PYAWW SAMPLE NAME",
     )
-    webapp.restart()
-    return static_file
+    await webapp.restart()
+    return static_header

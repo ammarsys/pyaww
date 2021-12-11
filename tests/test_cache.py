@@ -12,15 +12,16 @@ from pyaww import User, cache_func
 
 
 @cache_func(seconds=1, max_len=5)
-def hello(client: User, name: str = "Maria") -> str:
+async def hello(client: User, name: str = "Maria") -> str:
     client.helloed = name
     return "Hello " + name
 
 
-def test_caches(client: User) -> None:
-    hello(client, "John")
-    hello(client, name="Bob")
-    hello(client)
+@pytest.mark.asyncio
+async def test_caches(client: User) -> None:
+    await hello(client, "John")
+    await hello(client, name="Bob")
+    await hello(client)
 
     cache = client.cache["hello"].cache
     params = [(client, "John"), (client, "Bob"), (client, "Maria")]
@@ -34,8 +35,9 @@ def test_caches(client: User) -> None:
     client.cache = {}
 
 
-def test_TTL_getitem(client: User) -> None:
-    hello(client, "Martin")
+@pytest.mark.asyncio
+async def test_TTL_getitem(client: User) -> None:
+    await hello(client, "Martin")
     params = (client, "Martin")
 
     assert params in client.cache["hello"].cache
@@ -47,8 +49,9 @@ def test_TTL_getitem(client: User) -> None:
     client.cache = {}
 
 
-def test_TTL_contains(client: User) -> None:
-    hello(client, "Martin")
+@pytest.mark.asyncio
+async def test_TTL_contains(client: User) -> None:
+    await hello(client, "Martin")
     params = (client, "Martin")
 
     assert params in client.cache["hello"].cache
@@ -59,28 +62,30 @@ def test_TTL_contains(client: User) -> None:
     client.cache = {}
 
 
-def test_returns_cached_output(client: User) -> None:
-    hello(client, "David")
+@pytest.mark.asyncio
+async def test_returns_cached_output(client: User) -> None:
+    await hello(client, "David")
     assert client.helloed == "David"
 
     client.helloed = ""
 
-    hello(client, "David")
+    await hello(client, "David")
     assert client.helloed == ""
 
     client.cache = {}
 
 
-def test_max_len(client: User) -> None:
-    hello(client, "Mark")
-    hello(client, "Sebastian")
-    hello(client, "John")
-    hello(client, "Jake")
-    hello(client, "Emma")
+@pytest.mark.asyncio
+async def test_max_len(client: User) -> None:
+    await hello(client, "Mark")
+    await hello(client, "Sebastian")
+    await hello(client, "John")
+    await hello(client, "Jake")
+    await hello(client, "Emma")
 
     assert len(client.cache["hello"]) == 5
 
-    hello(client, "Jenny")
+    await hello(client, "Jenny")
 
     assert (
         not ((client, "Mark") in client.cache["hello"])
