@@ -96,24 +96,26 @@ def cache_func(
     The user is able to disable this caching via pyaww.User.use_cache or disable a specific method from being cached
     by appending the qualname of the function to the pyaww.User.disable_cache. Cached instances are stored in a
     dictionary which keys are the functions qualname(s) and it's values an utils.cache.FunctionCache object.
-    The time-to-live of values is handled inside the utils.cache.FunctionCache objects. Passed function in this deco.
-    must be a class instance (have self as it's first attribute) and that class must contain "disable_cache",
-    "use_cache" and "cache" instance variables.
+    The time-to-live of values is handled inside the utils.cache.FunctionCache objects.
+
+    Passed function in this deco must be a class instance (have self as it's first attribute) and that class must
+    contain "disable_cache", "use_cache", "cache" and "lock" instance variables. Please see how they're defined in the
+    example bellow.
 
     Examples:
+        >>> import asyncio
+        >>>
         >>> class Foo:
         >>>    def __init__(self):
         >>>         self.cache = {}
         >>>         self.use_cache = True
         >>>         self.disable_cache = ()
+        >>>         self.lock = asyncio.Lock()
         >>>
         >>>    @cache_func(seconds=1)
-        >>>    def bar(self, baz):
+        >>>    async def bar(self, baz):
         >>>         print("I was ran.")
         >>>         return baz + 1
-        >>>
-        >>> obj = Foo()
-        >>> obj.bar(1)  # now cached
 
     Args:
         max_len (Union[float, int] = float('inf')): maximum number of cached records
@@ -124,7 +126,7 @@ def cache_func(
     """
 
     def real_decorator(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]:
-        """The actual decorator"""
+        """The actual decorator, the function is expected to be an awaitable."""
 
         @wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> Awaitable[T]:

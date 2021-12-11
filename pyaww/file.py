@@ -23,7 +23,7 @@ class File:
 
     async def share(self) -> str:
         """
-        Share a file.
+        Share the file.
 
         Returns:
             str: shared URL
@@ -61,7 +61,7 @@ class File:
         )
 
     async def read(self) -> Any:
-        """Read files content."""
+        """Read the files content."""
         resp = await self._user.request(
             "GET", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
         )

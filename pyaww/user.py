@@ -2,8 +2,7 @@
 
 import asyncio
 import json
-import inspect
-from typing import AsyncIterator, Optional, TextIO
+from typing import AsyncIterator, Optional, TextIO, Union
 
 # Related third party imports
 
@@ -72,7 +71,13 @@ class User:
         if len(self.token) != 40:
             raise_error((401, "Invalid token."))
 
-    async def request(self, method: str, url: str, return_json: bool = False, **kwargs):
+    async def request(
+            self,
+            method: str,
+            url: str,
+            return_json: bool = False,
+            **kwargs
+    ) -> Union[aiohttp.ClientResponse, dict]:
         """
         Custom function to send http requests which handles errors as well.
 
@@ -85,7 +90,6 @@ class User:
         Returns:
             requests.models.Response
         """
-
         if not self.session:
             self.session = aiohttp.ClientSession()
 
@@ -171,7 +175,8 @@ class User:
             arguments (str): working directory for console
 
         Examples:
-            >>> User(...).create_console('python3.8')
+            >>> user = User(...)
+            >>> await user.create_console('python3.8')
 
         Returns:
             Optional[Console]: console object, console sucessfully created or None if console limit was hit
@@ -240,7 +245,6 @@ class User:
         Returns:
             File: File class (see pyaww.file)
         """
-
         return File(path, self)
 
     async def create_file(self, path: str, file: TextIO) -> File:
@@ -252,8 +256,9 @@ class User:
             file (TextIO): file to be created / updated
 
         Examples:
+            >>> user = User(...)
             >>> with open('./grocery_list.txt') as f:
-            >>>    User(...).create_file('/home/yourname/grocery_list.txt', f)
+            >>>    await user.create_file('/home/yourname/grocery_list.txt', f)
         """
         await self.request(
             "POST",
@@ -322,7 +327,8 @@ class User:
             description (str): description of the task
 
         Examples:
-            >>> User(...).create_sched_task('cmd', '5', '5', 'daily', False, 'do "cmd"')
+            >>> user = User(...)
+            >>> await user.create_sched_task('cmd', '5', '5', 'daily', False, 'do "cmd"')
 
         Returns:
             SchedTask
@@ -354,7 +360,8 @@ class User:
             enabled (bool): whether the task should be enabled upon creation
 
         Examples:
-            >>> User(...).create_always_on_task('/home/yourname/myscript.py', 'Scrape a website', True)
+            >>> user = User(...)
+            >>> await user.create_always_on_task('/home/yourname/myscript.py', 'Scrape a website', True)
 
         Returns:
             AlwaysOnTask
@@ -405,7 +412,8 @@ class User:
             command (str): takes "python3", "python" and/or "save_and_run_python"
 
         Examples:
-            >>> User(...).set_python_version(3.8, 'python3')
+            >>> user = User(...)
+            >>> user.set_python_version(3.8, 'python3')
         """
         await self.request(
             "PATCH",
@@ -459,7 +467,8 @@ class User:
             python_version (str): python version for the webapp to use (ex: python37 which stands for python 3.7)
 
         Examples:
-            >>> User(...).create_webapp('username.pythonanywhere.com', 'python39')
+            >>> user = User(...)
+            >>> await user.create_webapp('username.pythonanywhere.com', 'python39')
 
         Returns:
             WebApp
