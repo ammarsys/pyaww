@@ -40,15 +40,19 @@ To use this module, you first have to create an API key over [here](https://www.
 After you've done that, copy the credentials and provide them to the `pyaww.User` class. It is advised that you do 
 *not* make your token public within the code, instead, you should store it [securely](https://stackoverflow.com/questions/41546883/what-is-the-use-of-python-dotenv) 
 using a package like `python-dotenv`.
+
+This module is asynchronous meaning it utilises the `async` / `await` syntax.
+
 ```py
-from pyaww import User
+import pyaww
+import asyncio
 
 # construct the user class
-client: User = User(auth='TOKEN_GOES_HERE', username='USERNAME_GOES_HERE')
+client = pyaww.User(auth=..., username=...)
 
-def cpu() -> dict:
+async def cpu() -> dict:
     """Gets the CPU information."""
-    return client.get_cpu_info()
+    return await client.get_cpu_info()
 
-print(cpu())
+asyncio.run(cpu())
 ```
