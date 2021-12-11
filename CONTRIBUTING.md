@@ -38,7 +38,7 @@ with a good description on the changes you've made.
 
 ## How to run the tests?
 
-1. Install the `pytest` and the `python-dotenv` library.
+1. Install the `pytest`, `pytest-asyncio` and the `python-dotenv` library.
 2. Navigate to `pyaww/tests/assets` and create `.env`. It should contain:
 ```dotenv
 USERNAME=USERNAME
