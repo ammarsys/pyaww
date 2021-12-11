@@ -13,6 +13,7 @@
 
 An API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`ny`w`here`w`rapper. The key-features are,
 
+- Modern API wrapper using the `async` / `await` syntax
 - 100% API coverage, 100% tested
 - Object-oriented
 - Fully documented & Typehinted
