@@ -77,3 +77,7 @@ or if you can propose a better idea.
 ### Ratelimiting
 - 40/minute for everything except console inputs where it is 120/min
 - decorator style or a leaky bucket
+
+
+### Docstrings
+- now with concurrency, most examples/docs are outdated
