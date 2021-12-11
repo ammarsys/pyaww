@@ -50,14 +50,10 @@ To properly test the module, use a "fresh account". Just create an alternative a
 you're good to go!
 
 3. Ensure your CWD is `pyaww` and not `pyaww/tests` or similar.
-4. Run `py -m pytest -v -s`.
+4. Run `py -m pytest -s`.
 5. Fix if anything is wrong, if not, your tests are fine.
 
 ## What is currently our TODO for 0.0.4 version?
-
-#### Making the documentations good.
-- ~~The automatically ...~~
-
 
 ### Better caching
 - ~~TTL cache ...~~ 
@@ -68,11 +64,11 @@ you're good to go!
 sample use-case is, 
 ```py
 @cache_func
-def consoles() -> list:
+async def consoles() -> list:
     ...
 
 @update_cache(func='User.get_console_by_id', mode='ADD_TO_CACHE', identifier="RETURN")
-def create_console(...) -> Console:
+async def create_console(...) -> Console:
     """Once a console is created, it'll be added to the cache of User.consoles."""
     ...
 ```
@@ -80,4 +76,4 @@ or if you can propose a better idea.
 
 ### Ratelimiting
 - 40/minute for everything except console inputs where it is 120/min
-- decorator style
+- decorator style or a leaky bucket
