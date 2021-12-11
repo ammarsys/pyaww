@@ -1,6 +1,8 @@
 import pyaww
 
-client = pyaww.user.User("...", "...")
+client = pyaww.User(..., ...)
 
-file = client.get_file_by_path("/home/yourname/yoursite/somefile.py")
-file.delete()
+
+async def delete_file_by_path(path: str) -> None:
+    file = await client.get_file_by_path(path)
+    await file.delete()

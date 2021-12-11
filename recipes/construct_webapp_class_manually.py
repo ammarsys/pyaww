@@ -1,8 +1,8 @@
 import pyaww
 
-client = pyaww.user.User("...", "...")
+client = pyaww.user.User(..., ...)
 
-my_webapp = pyaww.webapp.WebApp(
+my_webapp = pyaww.WebApp(
     {
         "id": 123,
         "user": "sampleuser",
@@ -16,4 +16,3 @@ my_webapp = pyaww.webapp.WebApp(
     },
     client,
 )
-# do stuff with the webapp object now

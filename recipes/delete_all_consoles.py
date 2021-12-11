@@ -1,8 +1,10 @@
 import pyaww
 
-client = pyaww.user.User("...", "...")
+client = pyaww.User(..., ...)
 
-consoles = client.consoles()
-for console in consoles["personal"]:
-    print(f"deleting console with the name {console.name}...")
-    console.delete()
+
+async def kill_all_personal_consoles() -> None:
+    consoles = await client.consoles()
+    for console in consoles["personal"]:
+        print(f"deleting console with the name {console.name}...")
+        await console.delete()
