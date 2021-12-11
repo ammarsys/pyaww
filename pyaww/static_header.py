@@ -21,21 +21,21 @@ class StaticHeader:
         vars(self).update(resp)
         self._url = f"/api/v0/user/{self._webapp.user}/webapps/{self._webapp.domain_name}/static_headers/{self.id}/"
 
-    def delete(self) -> None:
+    async def delete(self) -> None:
         """Delete the static header. Webapp restart required."""
-        self._webapp.userclass.request(
+        await self._webapp.userclass.request(
             "DELETE",
             self._url,
         )
 
-    def update(self, **kwargs) -> None:
+    async def update(self, **kwargs) -> None:
         """
         Update the static header. Webapp restart required.
 
         Args:
             **kwargs: takes url, name, value
         """
-        self._webapp.userclass.request(
+        await self._webapp.userclass.request(
             "PATCH",
             self._url,
             data=kwargs,

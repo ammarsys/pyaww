@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING, TextIO, Any
 
 # Local application/library specific imports
 
@@ -21,30 +21,32 @@ class File:
         self.path = path
         self._user = user
 
-    def share(self) -> str:
+    async def share(self) -> str:
         """
         Share a file.
 
         Returns:
             str: shared URL
         """
-        return self._user.request(
+        resp = await self._user.request(
             "POST",
             f"/api/v0/user/{self._user.username}/files/sharing/",
             data={"path": self.path},
-        ).json()["url"]
+            return_json=True
+        )
+        return resp["url"]
 
-    def unshare(self) -> None:
+    async def unshare(self) -> None:
         """Function to stop sharing the file."""
-        self._user.request(
+        await self._user.request(
             "DELETE",
             f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
         )
 
-    def is_shared(self) -> bool:
+    async def is_shared(self) -> bool:
         """Function to check sharing status of the file."""
         try:
-            self._user.request(
+            await self._user.request(
                 "GET",
                 f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
             )
@@ -52,19 +54,20 @@ class File:
         except PythonAnywhereError:
             return False
 
-    def delete(self) -> None:
+    async def delete(self) -> None:
         """Delete the file."""
-        self._user.request(
+        await self._user.request(
             "DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
         )
 
-    def read(self) -> bytes:
-        """Read files contents. The contents are in bytes, call decode() on it."""
-        return self._user.request(
+    async def read(self) -> Any:
+        """Read files content."""
+        resp = await self._user.request(
             "GET", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
-        ).content
+        )
+        return await resp.text()
 
-    def update(self, content: TextIO) -> None:
+    async def update(self, content: TextIO) -> None:
         """
         Update the file.
 
@@ -72,11 +75,12 @@ class File:
             content (TextIOWrapper): content the file shall be updated with
 
         Examples:
-            >>> file = User(...).get_file_by_path('...')
+            >>> user = User(...)
+            >>> file = await user.get_file_by_path('...')
             >>> with open('newcontent.txt', 'r') as f:
-            >>>    file.update(f)
+            >>>    await file.update(f)
         """
-        self._user.create_file(self.path, content)
+        await self._user.create_file(self.path, content)
 
     def __str__(self):
         return self.path

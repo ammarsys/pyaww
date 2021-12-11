@@ -34,11 +34,11 @@ class SchedTask:
         vars(self).update(resp)
         self._user = user
 
-    def delete(self) -> None:
+    async def delete(self) -> None:
         """Delete the task."""
-        self._user.request("DELETE", self.url)
+        await self._user.request("DELETE", self.url)
 
-    def update(self, **kwargs) -> None:
+    async def update(self, **kwargs) -> None:
         """
         Updates the task. All times are in UTC.
 
@@ -47,10 +47,11 @@ class SchedTask:
             enabled bool
 
         Examples:
-            >>> task = User(...).get_sched_task_by_id(...)
-            >>> task.update(command='cd')
+            >>> user = User(...)
+            >>> task = await user.get_sched_task_by_id(...)
+            >>> await task.update(command='cd')
         """
-        self._user.request("PATCH", self.url, data=kwargs)
+        await self._user.request("PATCH", self.url, data=kwargs)
         vars(self).update(kwargs)
 
     def __str__(self):

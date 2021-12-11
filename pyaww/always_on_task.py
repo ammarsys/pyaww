@@ -20,9 +20,9 @@ class AlwaysOnTask(SchedTask):
     def __init__(self, resp: dict, user: "User") -> None:
         super().__init__(resp, user)
 
-    def restart(self) -> None:
+    async def restart(self) -> None:
         """Restart an always_on task."""
-        self._user.request("POST", self.url + "restart/")
+        await self._user.request("POST", self.url + "restart/")
 
     def __str__(self):
         return self.url

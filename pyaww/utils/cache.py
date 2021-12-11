@@ -6,7 +6,7 @@ import datetime
 import inspect
 
 from functools import wraps
-from typing import TypeVar, Callable, Any, Union, Optional
+from typing import TypeVar, Callable, Any, Union, Optional, Awaitable
 from dataclasses import dataclass
 from collections.abc import Mapping
 
@@ -123,17 +123,18 @@ def cache_func(
         Callable
     """
 
-    def real_decorator(func: Callable[P, T]) -> Callable[P, T]:
+    def real_decorator(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]:
         """The actual decorator"""
 
         @wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> Awaitable[T]:
             """The wrapper"""
 
             if not args[0].use_cache or func.__qualname__ in args[0].disable_cache:
-                return func(*args, **kwargs)
+                return await func(*args, **kwargs)
 
             cache = args[0].cache
+            lock = args[0].lock
 
             siggy = inspect.signature(func).bind(*args, **kwargs)
             siggy.apply_defaults()
@@ -145,16 +146,18 @@ def cache_func(
                 try:
                     return cache[func.__qualname__][params].ret
                 except KeyError:
-                    ret = func(*args, **kwargs)
-                    cache[func.__qualname__][params] = CachedRecord(params, time_, ret)
+                    ret = await func(*args, **kwargs)
+                    async with lock:
+                        cache[func.__qualname__][params] = CachedRecord(params, time_, ret)
                     return ret
             else:
-                ret = func(*args, **kwargs)
-                cache[func.__qualname__] = FunctionCache(
-                    name=func.__qualname__,
-                    to_cache=(params, CachedRecord(params, time_, ret)),
-                    max_len=max_len,
-                )
+                ret = await func(*args, **kwargs)
+                async with lock:
+                    cache[func.__qualname__] = FunctionCache(
+                        name=func.__qualname__,
+                        to_cache=(params, CachedRecord(params, time_, ret)),
+                        max_len=max_len,
+                    )
                 return ret
 
         return wrapper
