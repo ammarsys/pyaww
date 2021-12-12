@@ -32,7 +32,7 @@ class File:
             "POST",
             f"/api/v0/user/{self._user.username}/files/sharing/",
             data={"path": self.path},
-            return_json=True
+            return_json=True,
         )
         return resp["url"]
 

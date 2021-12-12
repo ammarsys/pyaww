@@ -37,11 +37,11 @@ class User:
     """
 
     def __init__(
-            self,
-            username: str,
-            auth: str,
-            async_session: aiohttp.ClientSession = None,
-            from_eu: bool = False,
+        self,
+        username: str,
+        auth: str,
+        async_session: aiohttp.ClientSession = None,
+        from_eu: bool = False,
     ) -> None:
         """
         Args:
@@ -72,11 +72,7 @@ class User:
             raise_error((401, "Invalid token."))
 
     async def request(
-            self,
-            method: str,
-            url: str,
-            return_json: bool = False,
-            **kwargs
+        self, method: str, url: str, return_json: bool = False, **kwargs
     ) -> Union[aiohttp.ClientResponse, dict]:
         """
         Custom function to send http requests which handles errors as well.
@@ -104,10 +100,16 @@ class User:
                 try:
                     jsoned = await resp.json(content_type=None)
 
-                    if not jsoned:  # no json, just raise an error so it doesn't get caught in the else
+                    if (
+                        not jsoned
+                    ):  # no json, just raise an error so it doesn't get caught in the else
                         raise PythonAnywhereError
 
-                except (json.decoder.JSONDecodeError, aiohttp.ContentTypeError, PythonAnywhereError):
+                except (
+                    json.decoder.JSONDecodeError,
+                    aiohttp.ContentTypeError,
+                    PythonAnywhereError,
+                ):
                     pass
 
                 else:
@@ -126,8 +128,7 @@ class User:
             dict: dictionary that contains relevant information (next_reset_time, time_left, time_left_untiL_reset)
         """
         return await self.request(
-            "GET", f"/api/v0/user/{self.username}/cpu/",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/cpu/", return_json=True
         )
 
     async def consoles(self) -> dict[str, list[Console]]:
@@ -139,14 +140,12 @@ class User:
             dictionary with keys (personal, shared) and values of shared and personal consoles.
         """
         personal = await self.request(
-            "GET",
-            f"/api/v0/user/{self.username}/consoles/",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/consoles/", return_json=True
         )
         shared = await self.request(
             "GET",
             f"/api/v0/user/{self.username}/consoles/shared_with_you/",
-            return_json=True
+            return_json=True,
         )
 
         return {
@@ -157,14 +156,12 @@ class User:
     async def get_console_by_id(self, id_: int) -> Console:
         """Get a console by its id."""
         resp = await self.request(
-            "GET",
-            f"/api/v0/user/{self.username}/consoles/{id_}",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/consoles/{id_}", return_json=True
         )
         return Console(resp, self)
 
     async def create_console(
-            self, executable: str, workingdir: str = None, arguments: str = ""
+        self, executable: str, workingdir: str = None, arguments: str = ""
     ) -> Optional[Console]:
         """
         Creates a console. Console must be started upon creation to send input to it.
@@ -190,7 +187,7 @@ class User:
                     "arguments": arguments,
                     "working_directory": workingdir,
                 },
-                return_json=True
+                return_json=True,
             )
 
             return Console(resp, self)
@@ -199,7 +196,7 @@ class User:
             raise_error((403, "You've reached the maximum number of consoles."))
 
     async def listdir(
-            self, path: str, recursive: bool = False, only_subdirectories: bool = True
+        self, path: str, recursive: bool = False, only_subdirectories: bool = True
     ) -> AsyncIterator[str]:
         """
         List dir that crawls into dirs (if recursive is set to true), if not, list files and sub-dirs in a directory.
@@ -219,7 +216,7 @@ class User:
         resp = await self.request(
             "GET",
             f"/api/v0/user/{self.username}/files/tree/?path={path}",
-            return_json=True
+            return_json=True,
         )
 
         if not recursive:
@@ -264,7 +261,7 @@ class User:
             "POST",
             f"/api/v0/user/{self.username}/files/path/{path}",
             data={"content": file},
-            return_json=True
+            return_json=True,
         )
 
         return File(path, self)
@@ -272,7 +269,9 @@ class User:
     @cache_func(300)
     async def students(self) -> dict:
         """List students of the user."""
-        return await self.request("GET", f"/api/v0/user/{self.username}/students/", return_json=True)
+        return await self.request(
+            "GET", f"/api/v0/user/{self.username}/students/", return_json=True
+        )
 
     async def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
@@ -286,12 +285,10 @@ class User:
             dictionary containing both scheduled and always_on tasks
         """
         schedules = await self.request(
-            "GET", f"/api/v0/user/{self.username}/schedule/",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/schedule/", return_json=True
         )
         always_on = await self.request(
-            "GET", f"/api/v0/user/{self.username}/always_on",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/always_on", return_json=True
         )
         return {
             "scheduled_tasks": [SchedTask(i, self) for i in schedules],
@@ -301,19 +298,18 @@ class User:
     async def get_sched_task_by_id(self, id_: int) -> SchedTask:
         """Get a scheduled task via it's id."""
         resp = await self.request(
-            "GET", f"/api/v0/user/{self.username}/schedule/{id_}/",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/schedule/{id_}/", return_json=True
         )
         return SchedTask(resp, self)
 
     async def create_sched_task(
-            self,
-            command: str,
-            minute: str,
-            hour: str,
-            interval: str = "daily",
-            enabled: bool = True,
-            description: str = "",
+        self,
+        command: str,
+        minute: str,
+        hour: str,
+        interval: str = "daily",
+        enabled: bool = True,
+        description: str = "",
     ) -> SchedTask:
         """
         Create a scheduled task. All times are in UTC.
@@ -343,13 +339,15 @@ class User:
         }
 
         resp = await self.request(
-            "POST", f"/api/v0/user/{self.username}/schedule/", data=data,
-            return_json=True
+            "POST",
+            f"/api/v0/user/{self.username}/schedule/",
+            data=data,
+            return_json=True,
         )
         return SchedTask(resp, self)
 
     async def create_always_on_task(
-            self, command: str, description: str = "", enabled: bool = True
+        self, command: str, description: str = "", enabled: bool = True
     ) -> AlwaysOnTask:
         """
         Creates a always_on task, do not confuse it with a scheduled task.
@@ -372,15 +370,14 @@ class User:
             "POST",
             f"/api/v0/user/{self.username}/always_on/",
             data=data,
-            return_json=True
+            return_json=True,
         )
         return AlwaysOnTask(resp, self)
 
     async def get_always_on_task_by_id(self, id_: int) -> AlwaysOnTask:
         """Gets an always_on task."""
         resp = await self.request(
-            "GET", f"/api/v0/user/{self.username}/always_on/{id_}/",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/always_on/{id_}/", return_json=True
         )
         return AlwaysOnTask(resp, self)
 
@@ -389,17 +386,19 @@ class User:
         """Get all 3 ("python3", "python" and "run button") versions."""
         return [
             await self.request(
-                "GET", f"/api/v0/user/{self.username}/default_python3_version/",
-                return_json=True
+                "GET",
+                f"/api/v0/user/{self.username}/default_python3_version/",
+                return_json=True,
             ),
             await self.request(
-                "GET", f"/api/v0/user/{self.username}/default_python_version/",
-                return_json=True
+                "GET",
+                f"/api/v0/user/{self.username}/default_python_version/",
+                return_json=True,
             ),
             await self.request(
                 "GET",
                 f"/api/v0/user/{self.username}/default_save_and_run_python_version/",
-                return_json=True
+                return_json=True,
             ),
         ]
 
@@ -429,7 +428,9 @@ class User:
         The system image for your account determines the versions of Python that you can use and the packages that
         are pre-installed.
         """
-        return await self.request("GET", f"/api/v0/user/{self.username}/system_image/", return_json=True)
+        return await self.request(
+            "GET", f"/api/v0/user/{self.username}/system_image/", return_json=True
+        )
 
     async def set_system_image(self, system_image: str) -> None:
         """
@@ -447,15 +448,18 @@ class User:
     async def get_webapp_by_domain_name(self, domain_name: str) -> WebApp:
         """Get a webapp via its domain."""
         resp = await self.request(
-            "GET", f"/api/v0/user/{self.username}/webapps/{domain_name}/",
-            return_json=True
+            "GET",
+            f"/api/v0/user/{self.username}/webapps/{domain_name}/",
+            return_json=True,
         )
         return WebApp(resp, self)
 
     @cache_func(300)
     async def webapps(self) -> list[WebApp]:
         """Get webapps for the user."""
-        resp = await self.request("GET", f"/api/v0/user/{self.username}/webapps/", return_json=True)
+        resp = await self.request(
+            "GET", f"/api/v0/user/{self.username}/webapps/", return_json=True
+        )
         return [WebApp(i, self) for i in resp]
 
     async def create_webapp(self, domain_name: str, python_version: str) -> WebApp:
@@ -476,9 +480,10 @@ class User:
         data = {"domain_name": domain_name, "python_version": python_version}
 
         await self.request(
-            "POST", f"/api/v0/user/{self.username}/webapps/",
+            "POST",
+            f"/api/v0/user/{self.username}/webapps/",
             data=data,
-            return_json=True
+            return_json=True,
         )  # does not return all the necessary data for pyaww.WebApps init
         return await self.get_webapp_by_domain_name(domain_name=domain_name)
 

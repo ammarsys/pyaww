@@ -60,8 +60,7 @@ class Console:
     async def outputs(self) -> str:
         """Return all outputs in the console."""
         resp = await self._user.request(
-            "GET", "/api/v0" + self.console_url + "get_latest_output/",
-            return_json=True
+            "GET", "/api/v0" + self.console_url + "get_latest_output/", return_json=True
         )
 
         return resp["output"]

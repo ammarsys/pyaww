@@ -13,7 +13,9 @@ async def test_restart(always_on_task: AlwaysOnTask) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_always_on_task_by_id(client: User, always_on_task: AlwaysOnTask) -> None:
+async def test_get_always_on_task_by_id(
+    client: User, always_on_task: AlwaysOnTask
+) -> None:
     assert await client.get_always_on_task_by_id(always_on_task.id) == always_on_task
 
 

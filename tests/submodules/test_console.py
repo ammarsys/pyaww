@@ -8,7 +8,9 @@ from pyaww import Console
 
 
 @pytest.mark.asyncio
-async def test_send_input(started_console: Console) -> None:  # this method also tests pyaww.Console.outputs()
+async def test_send_input(
+    started_console: Console,
+) -> None:  # this method also tests pyaww.Console.outputs()
     assert isinstance(await started_console.send_input("echo hello!"), str)
 
 

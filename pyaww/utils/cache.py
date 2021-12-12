@@ -150,7 +150,9 @@ def cache_func(
                 except KeyError:
                     ret = await func(*args, **kwargs)
                     async with lock:
-                        cache[func.__qualname__][params] = CachedRecord(params, time_, ret)
+                        cache[func.__qualname__][params] = CachedRecord(
+                            params, time_, ret
+                        )
                     return ret
             else:
                 ret = await func(*args, **kwargs)

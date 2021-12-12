@@ -54,8 +54,8 @@ def ratelimit(func: Callable[P, T]) -> Callable[P, T]:
 
         else:
             rl.limit[url] = (
-                    datetime.datetime.now() + datetime.timedelta(seconds=1),
-                    URL([datetime.datetime.now()], max_)
+                datetime.datetime.now() + datetime.timedelta(seconds=1),
+                URL([datetime.datetime.now()], max_),
             )
 
         return func(*args, **kwargs)

@@ -25,12 +25,16 @@ async def test_static_file_delete(static_file: StaticFile) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_static_header_by_id(static_header: StaticHeader, webapp: WebApp) -> None:
+async def test_get_static_header_by_id(
+    static_header: StaticHeader, webapp: WebApp
+) -> None:
     assert await webapp.get_static_header_by_id(static_header.id) == static_header
 
 
 @pytest.mark.asyncio
-async def test_static_header_update(static_header: StaticHeader, webapp: WebApp) -> None:
+async def test_static_header_update(
+    static_header: StaticHeader, webapp: WebApp
+) -> None:
     await static_header.update(url="PYAWW TESTING")
     await webapp.restart()
     assert static_header.url == "PYAWW TESTING"

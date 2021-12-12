@@ -45,7 +45,7 @@ TEST_RELATIVE_PATH_TO_FILE = r"tests/assets/data.txt"
 TEST_STUDENT_TO_REMOVE = "ANYTHING_HERE"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def event_loop():
     # It's safe to ignore these warnings.
 
@@ -101,7 +101,9 @@ async def student_name() -> str:
 @pytest.fixture(scope="session")
 async def scheduled_task(client: User) -> SchedTask:
     """Create a scheduled task"""
-    return await client.create_sched_task(command="echo hello world", hour="5", minute="5")
+    return await client.create_sched_task(
+        command="echo hello world", hour="5", minute="5"
+    )
 
 
 @pytest.fixture
