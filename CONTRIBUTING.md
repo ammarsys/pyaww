@@ -55,23 +55,6 @@ you're good to go!
 
 ## What is currently our TODO for 0.0.4 version?
 
-### Better caching
-- Caching methods outside `pyaww.User`, specifically the submodules
-- an `update_cache` function that updates the cache. A MVP would probably accept string-like options, 
-`WIPE`, `ADD_TO_CACHE`, etc. The `WIPE` option for example would be a value for a parameter in a decorator, 
-sample use-case is, 
-```py
-@cache_func
-async def consoles() -> list:
-    ...
-
-@update_cache(func='User.get_console_by_id', mode='ADD_TO_CACHE', identifier="RETURN")
-async def create_console(...) -> Console:
-    """Once a console is created, it'll be added to the cache of User.consoles."""
-    ...
-```
-or if you can propose a better idea.
-
 ### Ratelimiting (see issue 2)
 - 40/minute for everything except console inputs where it is 120/min
 - leaky bucket
