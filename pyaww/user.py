@@ -7,6 +7,7 @@ from typing import AsyncIterator, Optional, TextIO, Union
 # Related third party imports
 
 import aiohttp
+import datetime
 
 # Local application/library specific imports
 
@@ -16,8 +17,20 @@ from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
 from .types import cache_type
-from .errors import raise_error, PythonAnywhereError
-from .utils import cache_func
+from .errors import raise_error
+from .utils import CachedResponse, URLCache
+
+
+async def _parse_json(resp: aiohttp.ClientResponse, return_json: bool) -> Optional[dict]:
+    """Parse the JSON."""
+    jsoned = await resp.json(content_type=None)
+
+    if jsoned:
+        for key in ("detail", "error", "error_message", "non_field_errors"):
+            if key in jsoned:
+                raise_error((resp.status, jsoned[key]))
+
+    return jsoned if return_json else resp
 
 
 class User:
@@ -51,7 +64,7 @@ class User:
         """
         self.use_cache = True
         self.cache: cache_type = {}
-        self.disable_cache = ()
+        self.disable_cache = {}
 
         self.from_eu = from_eu
         self.username = username
@@ -71,55 +84,83 @@ class User:
         if len(self.token) != 40:
             raise_error((401, "Invalid token."))
 
-    async def request(
-        self, method: str, url: str, return_json: bool = False, **kwargs
-    ) -> Union[aiohttp.ClientResponse, dict]:
-        """
-        Custom function to send http requests which handles errors as well.
-
-        Args:
-            return_json (bool): return jsoned output
-            method (str): method for the http request
-            url (str): URL for the http request
-            **kwargs: any additional kwargs such as "data" for post requests
-
-        Returns:
-            requests.models.Response
-        """
-        if not self.session:
-            self.session = aiohttp.ClientSession()
-
-        async with self.sem:
-            async with self.session.request(
+    async def __make_request(self, method: str, url: str, **kwargs) -> aiohttp.ClientResponse:
+        """Make a request; private because it can mess with caching"""
+        return await self.session.request(
                 method=method,
                 url=self.request_url + url,
                 headers=self.headers,
                 **kwargs,
-            ) as resp:
+        )
 
+    async def request(
+        self, method: str, url: str, return_json: bool = False, data: dict = None, cache: Union[bool, tuple] = True
+    ) -> Union[aiohttp.ClientResponse, dict]:
+        """
+        Request function for the API.
+
+        TTL caching is handled here using pyaww.URLCache and pyaww.CachedResponse. To prevent an URL from being cached,
+        add it to the User.disable_cache instance variable. Sample use for this would be any sort of URLs that create
+        things, such as creating consoles, you don't want that to be cached.
+
+        Cached URLs are stored in a dictionary (instance variable "cache") which keys are the URLs and it's values an
+        utils.cache.URLCache object. The time-to-live of values is handled inside the utils.cache.URLCache objects via
+        the dunder methods, (__contains__ and __getitem__.)
+
+        Args:
+            cache (cache: Union[bool, tuple]): takes a bool argument on whether to cache or not
+            data (dict): data for the post request
+            return_json (bool): return jsoned output
+            method (str): method for the http request
+            url (str): URL for the http request
+
+        Returns:
+            Union[aiohttp.ClientResponse, dict]
+
+        TODO: Turn the dictionary into a hashable type. Sometimes, this function tries to cache dictionaries and a
+        TODO: dictionary is not hashable.
+
+        ERROR tests/submodules/test_webapp.py::test_get_static_header_by_id - TypeError: unhashable type: 'dict'
+        ERROR tests/submodules/test_webapp.py::test_static_header_update - TypeError: unhashable type: 'dict'
+        ERROR tests/submodules/test_webapp.py::test_static_header_delete - TypeError: unhashable type: 'dict'
+
+        """
+        if not data:
+            data = {}
+
+        if not self.session:
+            self.session = aiohttp.ClientSession()
+
+        time_ = datetime.datetime.now() + datetime.timedelta(seconds=2)
+        params = (method, tuple(data.items()))
+
+        async with self.sem:
+            if url in self.disable_cache or not self.use_cache or not cache:
+                resp = await self.__make_request(method, url, data=data)
+
+            elif url in self.cache:
                 try:
-                    jsoned = await resp.json(content_type=None)
+                    cached = self.cache[url][params].ret
+                    return await _parse_json(cached, return_json)
+                except KeyError:
+                    resp = await self.__make_request(method, url, data=data)
 
-                    if (
-                        not jsoned
-                    ):  # no json, just raise an error so it doesn't get caught in the else
-                        raise PythonAnywhereError
+                    async with self.lock:
+                        self.cache[url][params] = CachedResponse(
+                            params, time_, resp
+                        )
 
-                except (
-                    json.decoder.JSONDecodeError,
-                    aiohttp.ContentTypeError,
-                    PythonAnywhereError,
-                ):
-                    pass
+            else:
+                resp = await self.__make_request(method, url, data=data)
 
-                else:
-                    for key in ("detail", "error", "error_message", "non_field_errors"):
-                        if key in jsoned:
-                            raise_error((resp.status, jsoned[key]))
+                async with self.lock:
+                    self.cache[url] = URLCache(
+                        url,
+                        to_cache=(params, CachedResponse(params, time_, resp))
+                    )
 
-                return jsoned if return_json else resp
+        return await _parse_json(resp, return_json)
 
-    @cache_func(seconds=300)
     async def get_cpu_info(self) -> dict:
         """
         Gets CPU information.
@@ -262,11 +303,11 @@ class User:
             f"/api/v0/user/{self.username}/files/path/{path}",
             data={"content": file},
             return_json=True,
+            cache=False,
         )
 
         return File(path, self)
 
-    @cache_func(300)
     async def students(self) -> dict:
         """List students of the user."""
         return await self.request(
@@ -275,7 +316,7 @@ class User:
 
     async def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
-        await self.request("DELETE", f"/api/v0/user/{self.username}/students/{student}")
+        await self.request("DELETE", f"/api/v0/user/{self.username}/students/{student}", cache=False)
 
     async def tasks(self) -> dict[str, list]:
         """
@@ -381,7 +422,6 @@ class User:
         )
         return AlwaysOnTask(resp, self)
 
-    @cache_func(seconds=180)
     async def python_versions(self) -> list:
         """Get all 3 ("python3", "python" and "run button") versions."""
         return [
@@ -420,7 +460,6 @@ class User:
             data={f"default_{command}_version": version},
         )
 
-    @cache_func(seconds=300)
     async def get_system_image(self) -> dict:
         """
         Get the current system image.
@@ -454,7 +493,6 @@ class User:
         )
         return WebApp(resp, self)
 
-    @cache_func(300)
     async def webapps(self) -> list[WebApp]:
         """Get webapps for the user."""
         resp = await self.request(
