@@ -21,7 +21,9 @@ from .errors import raise_error
 from .utils import CachedResponse, URLCache
 
 
-async def _parse_json(resp: aiohttp.ClientResponse, return_json: bool) -> Optional[dict]:
+async def _parse_json(
+    resp: aiohttp.ClientResponse, return_json: bool
+) -> Optional[dict]:
     """Parse the JSON."""
     jsoned = await resp.json(content_type=None)
 
@@ -84,17 +86,24 @@ class User:
         if len(self.token) != 40:
             raise_error((401, "Invalid token."))
 
-    async def __make_request(self, method: str, url: str, **kwargs) -> aiohttp.ClientResponse:
+    async def __make_request(
+        self, method: str, url: str, **kwargs
+    ) -> aiohttp.ClientResponse:
         """Make a request; private because it can mess with caching"""
         return await self.session.request(
-                method=method,
-                url=self.request_url + url,
-                headers=self.headers,
-                **kwargs,
+            method=method,
+            url=self.request_url + url,
+            headers=self.headers,
+            **kwargs,
         )
 
     async def request(
-        self, method: str, url: str, return_json: bool = False, data: dict = None, cache: Union[bool, tuple] = True
+        self,
+        method: str,
+        url: str,
+        return_json: bool = False,
+        data: dict = None,
+        cache: Union[bool, tuple] = True,
     ) -> Union[aiohttp.ClientResponse, dict]:
         """
         Request function for the API.
@@ -146,17 +155,14 @@ class User:
                     resp = await self.__make_request(method, url, data=data)
 
                     async with self.lock:
-                        self.cache[url][params] = CachedResponse(
-                            params, time_, resp
-                        )
+                        self.cache[url][params] = CachedResponse(params, time_, resp)
 
             else:
                 resp = await self.__make_request(method, url, data=data)
 
                 async with self.lock:
                     self.cache[url] = URLCache(
-                        url,
-                        to_cache=(params, CachedResponse(params, time_, resp))
+                        url, to_cache=(params, CachedResponse(params, time_, resp))
                     )
 
         return await _parse_json(resp, return_json)
@@ -316,7 +322,9 @@ class User:
 
     async def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
-        await self.request("DELETE", f"/api/v0/user/{self.username}/students/{student}", cache=False)
+        await self.request(
+            "DELETE", f"/api/v0/user/{self.username}/students/{student}", cache=False
+        )
 
     async def tasks(self) -> dict[str, list]:
         """

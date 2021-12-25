@@ -36,7 +36,10 @@ class URLCache(Mapping):
     """
 
     def __init__(
-            self, name: str, max_len: Union[float, int] = float('inf'), to_cache: tuple = None
+        self,
+        name: str,
+        max_len: Union[float, int] = float("inf"),
+        to_cache: tuple = None,
     ):  # Defaulting max_len because of the update_cache function
         self.name = name
         self.max_len = max_len
