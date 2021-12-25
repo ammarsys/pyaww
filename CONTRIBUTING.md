@@ -56,8 +56,6 @@ you're good to go!
 ## What is currently our TODO for 0.0.4 version?
 
 ### Better caching
-- ~~TTL cache ...~~ 
-- Thread safe caching with `threading.RLock`
 - Caching methods outside `pyaww.User`, specifically the submodules
 - an `update_cache` function that updates the cache. A MVP would probably accept string-like options, 
 `WIPE`, `ADD_TO_CACHE`, etc. The `WIPE` option for example would be a value for a parameter in a decorator, 
@@ -74,10 +72,6 @@ async def create_console(...) -> Console:
 ```
 or if you can propose a better idea.
 
-### Ratelimiting
+### Ratelimiting (see issue 2)
 - 40/minute for everything except console inputs where it is 120/min
-- decorator style or a leaky bucket
-
-
-### Docstrings
-- now with concurrency, most examples/docs are outdated
+- leaky bucket
