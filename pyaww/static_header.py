@@ -26,6 +26,7 @@ class StaticHeader:
         await self._webapp.userclass.request(
             "DELETE",
             self._url,
+            cache=False,
         )
 
     async def update(self, **kwargs) -> None:
@@ -39,6 +40,7 @@ class StaticHeader:
             "PATCH",
             self._url,
             data=kwargs,
+            cache=False,
         )
         vars(self).update(kwargs)
 
