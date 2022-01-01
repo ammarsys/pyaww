@@ -60,7 +60,9 @@ class File:
     async def delete(self) -> None:
         """Delete the file."""
         await self._user.request(
-            "DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}", cache=False
+            "DELETE",
+            f"/api/v0/user/{self._user.username}/files/path/{self.path}",
+            cache=False,
         )
 
     async def read(self) -> Any:

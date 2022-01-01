@@ -533,13 +533,13 @@ class User:
         return [WebApp(i, self) for i in resp]
 
     async def something(self, data):
-        data = {'thing': 'thing2', 'data': data}
+        data = {"thing": "thing2", "data": data}
 
-        self.request_url = ''
+        self.request_url = ""
 
         return await self.request(
-            'POST',
-            'https://httpbin.org/post',
+            "POST",
+            "https://httpbin.org/post",
             data=data,
             return_json=True,
         )
