@@ -2,12 +2,12 @@
 
 import asyncio
 import json
-from typing import AsyncIterator, Optional, TextIO, Union
+import datetime
+from typing import AsyncIterator, Optional, TextIO, Union, Any
 
 # Related third party imports
 
 import aiohttp
-import datetime
 
 # Local application/library specific imports
 
@@ -24,8 +24,11 @@ from .utils import CachedResponse, URLCache
 async def _parse_json(
     resp: aiohttp.ClientResponse, return_json: bool
 ) -> Optional[dict]:
-    """Parse the JSON."""
-    jsoned = await resp.json(content_type=None)
+    """Parse the JSON and raise errors."""
+    try:
+        jsoned = await resp.json(content_type=None)
+    except json.decoder.JSONDecodeError:
+        jsoned = None
 
     if jsoned:
         for key in ("detail", "error", "error_message", "non_field_errors"):
@@ -33,6 +36,27 @@ async def _parse_json(
                 raise_error((resp.status, jsoned[key]))
 
     return jsoned if return_json else resp
+
+
+async def _parse_data(data: Union[str, dict]) -> Union[str, dict]:
+    """
+    Parse the POST request data so it works with tha caching system.
+
+    Args:
+        data (Union[str, dict]): if it's a str, it means the data was probably retrieved from the cache and now must be
+        converted to its original type and if it's a dictionary, it is most likely data argument in the request function
+        that needs to be converted to a string so it's hashable and able to be stored inside the dictionary as a key.
+
+    Returns:
+        Union[str, dict]
+    """
+    if isinstance(data, str):
+        return json.loads(data)
+
+    elif isinstance(data, dict):
+        return json.dumps(data)
+
+    return data
 
 
 class User:
@@ -104,7 +128,7 @@ class User:
         return_json: bool = False,
         data: dict = None,
         cache: Union[bool, tuple] = True,
-    ) -> Union[aiohttp.ClientResponse, dict]:
+    ) -> Union[aiohttp.ClientResponse, Any]:
         """
         Request function for the API.
 
@@ -116,6 +140,10 @@ class User:
         utils.cache.URLCache object. The time-to-live of values is handled inside the utils.cache.URLCache objects via
         the dunder methods, (__contains__ and __getitem__.)
 
+        If the method is a POST request, the data dictionary will be converted to a string to be stored inside the
+        dictionary and the POST request will be made with the actual dictionary. Upon sucessfully getting to the caching
+        return stage, the string will be converted to a dictionary again.
+
         Args:
             cache (cache: Union[bool, tuple]): takes a bool argument on whether to cache or not
             data (dict): data for the post request
@@ -125,14 +153,6 @@ class User:
 
         Returns:
             Union[aiohttp.ClientResponse, dict]
-
-        TODO: Turn the dictionary into a hashable type. Sometimes, this function tries to cache dictionaries and a
-        TODO: dictionary is not hashable.
-
-        ERROR tests/submodules/test_webapp.py::test_get_static_header_by_id - TypeError: unhashable type: 'dict'
-        ERROR tests/submodules/test_webapp.py::test_static_header_update - TypeError: unhashable type: 'dict'
-        ERROR tests/submodules/test_webapp.py::test_static_header_delete - TypeError: unhashable type: 'dict'
-
         """
         if not data:
             data = {}
@@ -141,16 +161,19 @@ class User:
             self.session = aiohttp.ClientSession()
 
         time_ = datetime.datetime.now() + datetime.timedelta(seconds=2)
-        params = (method, tuple(data.items()))
 
         async with self.sem:
             if url in self.disable_cache or not self.use_cache or not cache:
                 resp = await self.__make_request(method, url, data=data)
+                return await _parse_json(resp, return_json)
 
             elif url in self.cache:
+                params = (method, await _parse_data(data))
                 try:
                     cached = self.cache[url][params].ret
-                    return await _parse_json(cached, return_json)
+                    jsoned = await _parse_json(cached, return_json)
+
+                    return await _parse_data(jsoned)
                 except KeyError:
                     resp = await self.__make_request(method, url, data=data)
 
@@ -158,6 +181,7 @@ class User:
                         self.cache[url][params] = CachedResponse(params, time_, resp)
 
             else:
+                params = (method, await _parse_data(data))
                 resp = await self.__make_request(method, url, data=data)
 
                 async with self.lock:
@@ -507,6 +531,18 @@ class User:
             "GET", f"/api/v0/user/{self.username}/webapps/", return_json=True
         )
         return [WebApp(i, self) for i in resp]
+
+    async def something(self, data):
+        data = {'thing': 'thing2', 'data': data}
+
+        self.request_url = ''
+
+        return await self.request(
+            'POST',
+            'https://httpbin.org/post',
+            data=data,
+            return_json=True,
+        )
 
     async def create_webapp(self, domain_name: str, python_version: str) -> WebApp:
         """
