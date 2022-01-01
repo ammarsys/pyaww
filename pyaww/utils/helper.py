@@ -5,7 +5,7 @@
 from typing import Any, Iterator
 
 
-def flatten(items: Any) -> Iterator:
+async def flatten(items: Any) -> Iterator:
     """
     A function to "completely" flatten a list. For example, itertools.chain() would flatten it once but with recursion
     this function flattens it completely til it's a list with no nested lists.
@@ -21,6 +21,7 @@ def flatten(items: Any) -> Iterator:
             raise TypeError
 
         for i in items:
-            yield from flatten(i)
+            for x in flatten(i):
+                yield x
     except TypeError:
         yield items
