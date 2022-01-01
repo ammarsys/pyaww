@@ -33,6 +33,7 @@ class File:
             f"/api/v0/user/{self._user.username}/files/sharing/",
             data={"path": self.path},
             return_json=True,
+            cache=False,
         )
         return resp["url"]
 
@@ -41,6 +42,7 @@ class File:
         await self._user.request(
             "DELETE",
             f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+            cache=False,
         )
 
     async def is_shared(self) -> bool:
@@ -49,6 +51,7 @@ class File:
             await self._user.request(
                 "GET",
                 f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+                cache=False,
             )
             return True
         except PythonAnywhereError:
@@ -57,7 +60,7 @@ class File:
     async def delete(self) -> None:
         """Delete the file."""
         await self._user.request(
-            "DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
+            "DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}", cache=False
         )
 
     async def read(self) -> Any:
