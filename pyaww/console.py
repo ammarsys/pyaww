@@ -1,6 +1,7 @@
 # Standard library imports
 
 from typing import TYPE_CHECKING
+import inspect
 
 # Local application/library specific imports
 
@@ -55,7 +56,7 @@ class Console:
 
     async def delete(self) -> None:
         """Delete the console."""
-        await self._user.request("DELETE", "/api/v0" + self.console_url)
+        await self._user.request("DELETE", "/api/v0" + self.console_url, cache=False)
 
     async def outputs(self) -> str:
         """Return all outputs in the console."""
