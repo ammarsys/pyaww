@@ -57,6 +57,7 @@ async def _parse_data(data: Union[str, dict]) -> Union[str, dict]:
 
 
 async def _time(seconds: int) -> datetime.datetime:
+    """Make a timedelta in the future"""
     return datetime.datetime.now() + datetime.timedelta(seconds=seconds)
 
 
