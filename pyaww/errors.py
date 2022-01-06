@@ -19,12 +19,17 @@ class NotFound(InvalidInfo):
     """Exception for handling 404's."""
 
 
+class ConsoleLimit(InvalidInfo):
+    """Exception for handling 429's raised by having more then 2 consoles on a free plan"""
+
+
 ERRORS_DICT: dict[tuple[int, str], PythonAnywhereError] = {
     (401, "Invalid token."): InvalidInfo(
         "Bad token provided, please check it at https://www.pythonanywhere.com/account/#api_token",
         401,
     ),
     (404, "Not found."): NotFound("Not found.", 404),
+    (429, "Console limit reached."): ConsoleLimit("Console limit reached.", 429)
 }
 
 
