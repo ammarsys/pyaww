@@ -156,10 +156,10 @@ class User:
         The "creator" for the examples in the parentheses is `create_console`. It edits the other functions cache to
         make them up to date, specifically the asyncio.Lock.__aenter__ inside User.create_console. It will append onto
         the pyaww.CachedRecord ret parameter for the /api/v0/user/name/consoles/ endpoint if the URL and parameters are
-        present in the instance variable cache. It will not create a pyaww.URLCache object incase the URL is not present
-        in cache, because it may lead to inaccurate results (e.g. calling User.create_console then User.consoles.)
-        For the get_console_by_id cache, it will simply create an URLCache object as the console URLs are always unique,
-        meaning it is never present in the cache.
+        present in the instance variable cache. It will not create a utils.cache.URLCache object incase the URL is not
+        present in cache, because it may lead to inaccurate results (e.g. calling User.create_console then User.
+        consoles.) For the get_console_by_id cache, it will simply create an URLCache object as the console URLs are
+        always unique, meaning it is never present in the cache.
 
         The latter structure and caching logic is applied to the rest of the "creator" methods.
 
