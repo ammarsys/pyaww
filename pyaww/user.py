@@ -184,8 +184,7 @@ class User:
         async with self.sem:
             if url in self.disable_cache or not self.use_cache or not cache:
                 resp = await _parse_json(
-                    await self.__make_request(method, url, data=data),
-                    return_json
+                    await self.__make_request(method, url, data=data), return_json
                 )
 
             elif url in self.cache:
@@ -195,8 +194,7 @@ class User:
                     return self.cache[url][params].ret
                 except KeyError:
                     resp = await _parse_json(
-                        await self.__make_request(method, url, data=data),
-                        return_json
+                        await self.__make_request(method, url, data=data), return_json
                     )
 
                     async with self.lock:
@@ -205,8 +203,7 @@ class User:
             else:
                 params = (method, await _parse_data(data))
                 resp = await _parse_json(
-                    await self.__make_request(method, url, data=data),
-                    return_json
+                    await self.__make_request(method, url, data=data), return_json
                 )
 
                 async with self.lock:
@@ -236,14 +233,12 @@ class User:
             dictionary with keys (personal, shared) and values of shared and personal consoles.
         """
         personal = await self.request(
-            "GET",
-            f"/api/v0/user/{self.username}/consoles/",
-            return_json=True
+            "GET", f"/api/v0/user/{self.username}/consoles/", return_json=True
         )
         shared = await self.request(
             "GET",
             f"/api/v0/user/{self.username}/consoles/shared_with_you/",
-            return_json=True
+            return_json=True,
         )
 
         return {
@@ -295,7 +290,7 @@ class User:
             raise_error((429, "Console limit reached."))
 
         async with self.lock:
-            params = ('GET', '{}')
+            params = ("GET", "{}")
 
             if url in self.cache:
                 if params in self.cache[url].cache:
@@ -389,7 +384,9 @@ class User:
         """Remove a student from the students list."""
         try:
             await self.request(
-                "DELETE", f"/api/v0/user/{self.username}/students/{student}", cache=False
+                "DELETE",
+                f"/api/v0/user/{self.username}/students/{student}",
+                cache=False,
             )
         except json.decoder.JSONDecodeError:
             pass

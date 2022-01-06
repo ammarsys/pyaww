@@ -29,7 +29,7 @@ ERRORS_DICT: dict[tuple[int, str], PythonAnywhereError] = {
         401,
     ),
     (404, "Not found."): NotFound("Not found.", 404),
-    (429, "Console limit reached."): ConsoleLimit("Console limit reached.", 429)
+    (429, "Console limit reached."): ConsoleLimit("Console limit reached.", 429),
 }
 
 
