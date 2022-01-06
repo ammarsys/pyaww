@@ -25,10 +25,7 @@ async def _parse_json(
     resp: aiohttp.ClientResponse, return_json: bool
 ) -> Optional[dict]:
     """Parse the JSON and raise errors."""
-    try:
-        jsoned = await resp.json(content_type=None)
-    except json.decoder.JSONDecodeError:
-        jsoned = None
+    jsoned = await resp.json(content_type=None)
 
     if jsoned:
         for key in ("detail", "error", "error_message", "non_field_errors"):
@@ -57,6 +54,10 @@ async def _parse_data(data: Union[str, dict]) -> Union[str, dict]:
         return json.dumps(data)
 
     return data
+
+
+async def _time(seconds: int) -> datetime.datetime:
+    return datetime.datetime.now() + datetime.timedelta(seconds=seconds)
 
 
 class User:
@@ -127,7 +128,8 @@ class User:
         url: str,
         return_json: bool = False,
         data: dict = None,
-        cache: Union[bool, tuple] = True,
+        cache: bool = True,
+        cache_time: bool = 30,
     ) -> Union[aiohttp.ClientResponse, Any]:
         """
         Request function for the API.
@@ -144,8 +146,25 @@ class User:
         dictionary and the POST request will be made with the actual dictionary. Upon sucessfully getting to the caching
         return stage, the string will be converted to a dictionary again.
 
+        Cache is handled inside the functions that create submodules. The structure is usually like,
+
+        create_x (e.g. create_console)
+        get_x_by_y (e.g. get_console_by_id)
+        xs (e.g. consoles)
+
+        The "creator" for the examples in the parentheses is `create_console`. It edits the other functions cache to
+        make them up to date, specifically the asyncio.Lock.__aenter__ inside User.create_console. It will append onto
+        the pyaww.CachedRecord ret parameter for the /api/v0/user/name/consoles/ endpoint if the URL and parameters are
+        present in the instance variable cache. It will not create a pyaww.URLCache object incase the URL is not present
+        in cache, because it may lead to inaccurate results (e.g. calling User.create_console then User.consoles.)
+        For the get_console_by_id cache, it will simply create an URLCache object as the console URLs are always unique,
+        meaning it is never present in the cache.
+
+        The latter structure and caching logic is applied to the rest of the "creator" methods.
+
         Args:
-            cache (cache: Union[bool, tuple]): takes a bool argument on whether to cache or not
+            cache_time (bool): seconds param for _time
+            cache (bool): takes a bool argument on whether to cache or not
             data (dict): data for the post request
             return_json (bool): return jsoned output
             method (str): method for the http request
@@ -160,36 +179,42 @@ class User:
         if not self.session:
             self.session = aiohttp.ClientSession()
 
-        time_ = datetime.datetime.now() + datetime.timedelta(seconds=2)
+        time = await _time(seconds=cache_time)
 
         async with self.sem:
             if url in self.disable_cache or not self.use_cache or not cache:
-                resp = await self.__make_request(method, url, data=data)
-                return await _parse_json(resp, return_json)
+                resp = await _parse_json(
+                    await self.__make_request(method, url, data=data),
+                    return_json
+                )
 
             elif url in self.cache:
                 params = (method, await _parse_data(data))
-                try:
-                    cached = self.cache[url][params].ret
-                    jsoned = await _parse_json(cached, return_json)
 
-                    return await _parse_data(jsoned)
+                try:
+                    return self.cache[url][params].ret
                 except KeyError:
-                    resp = await self.__make_request(method, url, data=data)
+                    resp = await _parse_json(
+                        await self.__make_request(method, url, data=data),
+                        return_json
+                    )
 
                     async with self.lock:
-                        self.cache[url][params] = CachedResponse(params, time_, resp)
+                        self.cache[url][params] = CachedResponse(params, time, resp)
 
             else:
                 params = (method, await _parse_data(data))
-                resp = await self.__make_request(method, url, data=data)
+                resp = await _parse_json(
+                    await self.__make_request(method, url, data=data),
+                    return_json
+                )
 
                 async with self.lock:
                     self.cache[url] = URLCache(
-                        url, to_cache=(params, CachedResponse(params, time_, resp))
+                        url, to_cache=(params, CachedResponse(params, time, resp))
                     )
 
-        return await _parse_json(resp, return_json)
+        return resp
 
     async def get_cpu_info(self) -> dict:
         """
@@ -211,12 +236,14 @@ class User:
             dictionary with keys (personal, shared) and values of shared and personal consoles.
         """
         personal = await self.request(
-            "GET", f"/api/v0/user/{self.username}/consoles/", return_json=True
+            "GET",
+            f"/api/v0/user/{self.username}/consoles/",
+            return_json=True
         )
         shared = await self.request(
             "GET",
             f"/api/v0/user/{self.username}/consoles/shared_with_you/",
-            return_json=True,
+            return_json=True
         )
 
         return {
@@ -249,22 +276,36 @@ class User:
         Returns:
             Optional[Console]: console object, console sucessfully created or None if console limit was hit
         """
+        url = f"/api/v0/user/{self.username}/consoles/"
+
         try:
             resp = await self.request(
                 "POST",
-                f"/api/v0/user/{self.username}/consoles/",
+                url,
                 data={
                     "executable": executable,
                     "arguments": arguments,
                     "working_directory": workingdir,
                 },
                 return_json=True,
+                cache=False,
+            )
+        except json.decoder.JSONDecodeError:
+            resp = None  # Just for linters (local var resp might be referenced before assigment)
+            raise_error((429, "Console limit reached."))
+
+        async with self.lock:
+            params = ('GET', '{}')
+
+            if url in self.cache:
+                if params in self.cache[url].cache:
+                    self.cache[url].cache[params].ret.append(resp)
+
+            self.cache[f"{url}{resp['id']}/"] = URLCache(
+                url, to_cache=(params, CachedResponse(params, await _time(30), resp))
             )
 
-            return Console(resp, self)
-
-        except json.decoder.JSONDecodeError:
-            raise_error((403, "You've reached the maximum number of consoles."))
+        return Console(resp, self)
 
     async def listdir(
         self, path: str, recursive: bool = False, only_subdirectories: bool = True
@@ -346,9 +387,12 @@ class User:
 
     async def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
-        await self.request(
-            "DELETE", f"/api/v0/user/{self.username}/students/{student}", cache=False
-        )
+        try:
+            await self.request(
+                "DELETE", f"/api/v0/user/{self.username}/students/{student}", cache=False
+            )
+        except json.decoder.JSONDecodeError:
+            pass
 
     async def tasks(self) -> dict[str, list]:
         """
