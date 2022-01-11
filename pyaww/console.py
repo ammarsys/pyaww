@@ -1,7 +1,6 @@
 # Standard library imports
 
 from typing import TYPE_CHECKING
-import inspect
 
 # Local application/library specific imports
 
