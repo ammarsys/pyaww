@@ -40,9 +40,7 @@ class WebApp:
 
     async def delete(self) -> None:
         """Deletes the webapp."""
-        await self._user.request(
-            "DELETE", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/"
-        )
+        await self._user.request("DELETE", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/")
 
     async def update(self, **kwargs) -> None:
         """
@@ -52,41 +50,28 @@ class WebApp:
             **kwargs: can take: python_version, source_directory, virtualenv_path, force_https,
             password_protection_enabled, password_protection_username, password_protection_password
         """
-        await self._user.request(
-            "PATCH",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/",
-            data=kwargs,
-        )
+        await self._user.request("PATCH", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/", data=kwargs)
         vars(self).update(kwargs)
 
     async def restart(self) -> None:
         """Reloads the webapp."""
-        await self._user.request(
-            "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/reload/"
-        )
+        await self._user.request("POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/reload/")
 
     async def disable(self) -> None:
         """Disables the webapp."""
-        await self._user.request(
-            "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/disable/"
-        )
+        await self._user.request("POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/disable/")
 
     async def enable(self) -> None:
         """Enables the webapp."""
         try:
-            await self._user.request(
-                "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/enable/"
-            )
+            await self._user.request("POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/enable/")
         except PythonAnywhereError:
             pass
 
     async def get_ssl_info(self) -> dict:
         """Gets TLS/HTTP info of the webapp."""
-        return await self._user.request(
-            "GET",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/",
-            return_json=True,
-        )
+        return await self._user.request("GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/",
+                                        return_json=True)
 
     async def set_ssl_info(self, cert: str, private_key: str) -> None:
         """
@@ -97,19 +82,12 @@ class WebApp:
             private_key (str): TLS/HTTP private key
         """
         data = {"cert": cert, "private_key": private_key}
-        await self._user.request(
-            "POST",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/",
-            data=data,
-        )
+        await self._user.request("POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/", data=data)
 
     async def static_files(self) -> list[StaticFile]:
         """Gets the webapps static files."""
-        resp = await self._user.request(
-            "GET",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
-            return_json=True,
-        )
+        resp = await self._user.request("GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
+                                        return_json=True)
         return [StaticFile(i, self) for i in resp]
 
     async def create_static_file(self, file_path: str, url: str) -> StaticFile:
@@ -124,12 +102,8 @@ class WebApp:
             StaticFile
         """
         data = {"path": file_path, "url": url}
-        resp = await self._user.request(
-            "POST",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
-            data=data,
-            return_json=True,
-        )
+        resp = await self._user.request("POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
+                                        return_json=True, data=data)
         return StaticFile(resp, self)
 
     async def get_static_file_by_id(self, id_: int) -> StaticFile:
@@ -142,28 +116,21 @@ class WebApp:
         Returns:
             StaticFile
         """
-        resp = await self._user.request(
-            "GET",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/{id_}/",
-            return_json=True,
-        )
+        resp = await self._user.request("GET",
+                                        f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/{id_}/",
+                                        return_json=True)
         return StaticFile(resp, self)
 
     async def static_headers(self) -> list[dict]:
         """Get webapps static headers."""
-        return await self._user.request(
-            "GET",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
-            return_json=True,
-        )
+        return await self._user.request("GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
+                                        return_json=True)
 
     async def get_static_header_by_id(self, id_: int) -> StaticHeader:
         """Get a static header by it's id."""
-        resp = await self._user.request(
-            "GET",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/{id_}/",
-            return_json=True,
-        )
+        resp = await self._user.request("GET",
+                                        f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/{id_}/",
+                                        return_json=True)
         return StaticHeader(resp, self)
 
     async def create_static_header(
@@ -181,12 +148,8 @@ class WebApp:
             StaticHeader
         """
         data = {"url": url, "name": name, "value": value}
-        resp = await self._user.request(
-            "POST",
-            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
-            data=data,
-            return_json=True,
-        )
+        resp = await self._user.request("POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
+                                        return_json=True, data=data)
         return StaticHeader(resp, self)
 
     @property

@@ -23,11 +23,7 @@ class StaticHeader:
 
     async def delete(self) -> None:
         """Delete the static header. Webapp restart required."""
-        await self._webapp.userclass.request(
-            "DELETE",
-            self._url,
-            cache=False,
-        )
+        await self._webapp.userclass.request("DELETE", self._url)
 
     async def update(self, **kwargs) -> None:
         """
@@ -36,12 +32,7 @@ class StaticHeader:
         Args:
             **kwargs: takes url, name, value
         """
-        await self._webapp.userclass.request(
-            "PATCH",
-            self._url,
-            data=kwargs,
-            cache=False,
-        )
+        await self._webapp.userclass.request("PATCH", self._url, data=kwargs)
         vars(self).update(kwargs)
 
     def __str__(self):

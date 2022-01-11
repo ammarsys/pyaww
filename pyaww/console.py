@@ -45,24 +45,18 @@ class Console:
         Returns:
             str: latest writting in the console
         """
-        await self._user.request(
-            "POST",
-            "/api/v0" + self.console_url + f"send_input/",
-            data={"input": inp + end},
-        )
+        await self._user.request("POST", "/api/v0" + self.console_url + f"send_input/", data={"input": inp + end})
         outs = await self.outputs()
 
         return outs.split("\r")[-2].strip()
 
     async def delete(self) -> None:
         """Delete the console."""
-        await self._user.request("DELETE", "/api/v0" + self.console_url, cache=False)
+        await self._user.request("DELETE", "/api/v0" + self.console_url)
 
     async def outputs(self) -> str:
         """Return all outputs in the console."""
-        resp = await self._user.request(
-            "GET", "/api/v0" + self.console_url + "get_latest_output/", return_json=True
-        )
+        resp = await self._user.request("GET", "/api/v0" + self.console_url + "get_latest_output/", return_json=True)
 
         return resp["output"]
 
