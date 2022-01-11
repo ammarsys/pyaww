@@ -28,29 +28,43 @@ class File:
         Returns:
             str: shared URL
         """
-        resp = await self._user.request("POST", f"/api/v0/user/{self._user.username}/files/sharing/", return_json=True,
-                                        data={"path": self.path})
+        resp = await self._user.request(
+            "POST",
+            f"/api/v0/user/{self._user.username}/files/sharing/",
+            return_json=True,
+            data={"path": self.path},
+        )
         return resp["url"]
 
     async def unshare(self) -> None:
         """Function to stop sharing the file."""
-        await self._user.request("DELETE", f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}")
+        await self._user.request(
+            "DELETE",
+            f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+        )
 
     async def is_shared(self) -> bool:
         """Function to check sharing status of the file."""
         try:
-            await self._user.request("GET", f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}")
+            await self._user.request(
+                "GET",
+                f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+            )
             return True
         except PythonAnywhereError:
             return False
 
     async def delete(self) -> None:
         """Delete the file."""
-        await self._user.request("DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}")
+        await self._user.request(
+            "DELETE", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
+        )
 
     async def read(self) -> str:
         """Read the files content."""
-        resp = await self._user.request("GET", f"/api/v0/user/{self._user.username}/files/path/{self.path}")
+        resp = await self._user.request(
+            "GET", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
+        )
         return await resp.text()
 
     async def update(self, content: TextIO) -> None:

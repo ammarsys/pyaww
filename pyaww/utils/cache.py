@@ -5,7 +5,15 @@
 import datetime
 import asyncio
 
-from typing import Optional, TYPE_CHECKING, Generic, TypeVar, Hashable, Generator, AsyncGenerator
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+    Generic,
+    TypeVar,
+    Hashable,
+    Generator,
+    AsyncGenerator,
+)
 from collections.abc import MutableMapping
 
 # Local application/library specific imports
@@ -14,8 +22,8 @@ if TYPE_CHECKING:
     from pyaww import Console
 
 
-KT = TypeVar('KT', bound=Hashable)
-VT = TypeVar('VT')
+KT = TypeVar("KT", bound=Hashable)
+VT = TypeVar("VT")
 
 
 def _check_if_expired(item: datetime.datetime) -> bool:
