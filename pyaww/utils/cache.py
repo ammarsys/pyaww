@@ -3,83 +3,105 @@
 # Standard library imports
 
 import datetime
+import asyncio
 
-from typing import TypeVar, Any, Union, Optional
-from dataclasses import dataclass
-from collections.abc import Mapping
+from typing import Optional, TYPE_CHECKING, Generic, TypeVar, Hashable, Generator, AsyncGenerator
+from collections.abc import MutableMapping
 
-# Related third party imports
+# Local application/library specific imports
 
-from typing_extensions import ParamSpec
-
-T = TypeVar("T")
-P = ParamSpec("P")
+if TYPE_CHECKING:
+    from pyaww import Console
 
 
-@dataclass(frozen=True, eq=True)
-class CachedResponse:
-    params: tuple
-    future: datetime.datetime
-    ret: Any
+KT = TypeVar('KT', bound=Hashable)
+VT = TypeVar('VT')
 
 
-class URLCache(Mapping):
+def _check_if_expired(item: datetime.datetime) -> bool:
+    """Check if a record has expired"""
+    return item <= datetime.datetime.now()
+
+
+def _time(seconds: int) -> datetime.datetime:
+    """Make a timedelta in the future"""
+    return datetime.datetime.now() + datetime.timedelta(seconds=seconds)
+
+
+class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
     """
-    TTL cache for URLs. This class should be used inside a regular dictionary in the following style,
+    TTL (time-to-live) cache for pyaww module. This class is utilised inside pyaww.utils.Cache. Records may expire
+    upon interacting with them (__getitem__ and __contains__.)
 
-    >>> {'www.domain.com/api/v0/thing': URLCache(...)}
-
-    Keys/Values expire (get deleted) when you interact with them. In other words, when you call __getitem__ or
-    __contains__, the item will be checked to see if it's an instance of utils.cache.CachedResponse if it is,
-    see if the timedelta in the future is less than now, if it is, meaning its expired, pop the value and raise a
-    KeyError. Instances other than CachedResponse are ignored.
+    Ordinary format for the cache instance variable is the submodule initialized class id and the initialized class.
     """
 
-    def __init__(
-        self,
-        name: str,
-        max_len: Union[float, int] = float("inf"),
-        to_cache: tuple = None,
-    ):  # Defaulting max_len because of the update_cache function
-        self.name = name
-        self.max_len = max_len
-        self.cache: dict[tuple, CachedResponse] = {}
+    def __init__(self, ttl_time: int = 30):
+        self.ttl = ttl_time
+        self.cache: dict[KT, tuple[VT, datetime.datetime]] = {}
 
-        if to_cache:
-            self.__setitem__(*to_cache)
+    def __getitem__(self, item: KT) -> Optional[VT]:
+        if item not in self:
+            return None
 
-    def __check_if_expired(self, item: CachedResponse) -> Optional[None]:
-        """Method to see if a key has expired, private because it can mess with caching."""
-        if item.future <= datetime.datetime.now():
-            self.cache.pop(item.params)
-            raise KeyError
+        return self.cache[item][0]
 
-    def __getitem__(self, item):
-        item = self.cache[item]
-
-        if isinstance(item, CachedResponse):
-            self.__check_if_expired(item)
-
-        return item
-
-    def __contains__(self, item):
+    def __contains__(self, item: KT) -> bool:
         try:
-            item = self.cache[item]
-            if isinstance(item, CachedResponse):
-                if not self.__check_if_expired(item):
-                    return item in self.cache
+            _, dt = self.cache[item]
+
+            if not _check_if_expired(dt):
+                return True
         except KeyError:
             return False
         return False
 
-    def __setitem__(self, key, value):
-        if len(self.cache) >= self.max_len:  # max values and/or old values
-            self.cache.pop(list(self.cache)[0])
+    def __setitem__(self, key: KT, value: VT) -> None:
+        self.cache[key] = (value, _time(self.ttl))
 
-        self.cache[key] = value
-
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.cache)
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         yield from self.cache
+
+    def __delitem__(self, key: KT) -> None:
+        del self.cache[key]
+
+    def pop(self, key: KT) -> VT:
+        return self.cache.pop(key)
+
+    async def natural_values(self) -> AsyncGenerator:
+        for data in self.cache.values():
+            yield data[0]
+
+
+class Cache:
+    def __init__(self):
+        """
+        Main caching class for the module.
+
+        Each "type" (submodule) has its own get, set, delete and get all method. The types in question are,
+        pyaww.Console, pyaww.AlwaysOnTask, pyaww.StaticFile, pyaww.StaticHeader, pyaww.WebApp and pyaww.File. Alongside
+        each type, an instance variable (format: _type_cache) representing its cache will be created with the value
+        being pyaww.TTLCache.
+
+        Anti-race-condition measures are taken into count here via asyncio.Lock().
+        """
+        self.lock = asyncio.Lock()
+
+        self._console_cache: TTLCache[int, "Console"] = TTLCache()
+
+    async def all_consoles(self) -> AsyncGenerator:
+        return self._console_cache.natural_values()
+
+    async def get_console(self, id_: int) -> Optional["Console"]:
+        return self._console_cache.get(id_, None)
+
+    async def del_console(self, id_: int) -> None:
+        async with self.lock:
+            self._console_cache.pop(id_)
+
+    async def set_console(self, console: "Console") -> None:
+        async with self.lock:
+            self._console_cache[console.id] = console
