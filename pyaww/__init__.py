@@ -5,14 +5,13 @@ from pyaww.user import (
     SchedTask,
     User,
     WebApp,
+    Cache,
 )
 
-from pyaww.static_file import StaticFile
-from pyaww.static_header import StaticHeader
+from .static_file import StaticFile
+from .static_header import StaticHeader
 
-from pyaww.errors import *
-from pyaww.types import *
-
-from pyaww.utils.cache import URLCache, CachedResponse
+from .errors import *
+from .types import *
 
 __version__ = "0.0.4"
