@@ -1,6 +1,6 @@
 # Contributing to pyaww
 
-First, thanks for taking the time to contribute! ❤️ All contributions are welcomed and encouraged.
+First, thanks for taking the time to consider contributing! ❤️ All contributions are welcomed and encouraged.
 
 ## Contributing
 
@@ -16,13 +16,20 @@ cd pyaww
 4. Commit your changes, 
 
 ```
-git add pyaww/user.py
-git commit -m "[feat] add support for x in method y"
+git add pyaww/x.py
+git commit -m "[feat] add support for y in method z"
+```
+
+5. Create/update the tests if needed (look at `tests/README.md`), commit them as well,
+
+```
+git add tests/test_x.py
+git commit -m "[test] create test for parameter y in method z"
 ```
 
 Please look at the [following](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) git guide for commits.
 
-5. Push your changes `git push -u origin branch`.
+5. Push your changes via `git push -u origin branch`.
 6. [Create a PR](https://github.com/ammarsys/pyaww/issues/pulls),
 with a good description on the changes you've made.
 
@@ -35,6 +42,7 @@ with a good description on the changes you've made.
 - You must run tests using [pytest](https://pypi.org/project/pytest/) before creating a pull request.
 - Your code must be typehinted. Look into `pyright` or `pylance` type checkers if you do not have one.
 - Write clean and efficient code.
+- Create/update tests.
 
 ## How to run the tests?
 
