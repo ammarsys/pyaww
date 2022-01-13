@@ -24,7 +24,8 @@ async def test_get_cpu_info(client) -> None:
 
 @pytest.mark.asyncio
 async def test_get_consoles(client) -> None:
-    assert isinstance(await client.consoles(), dict)
+    assert isinstance(await client.consoles(), list)
+    assert isinstance(await client.shared_consoles(), list)
 
 
 @pytest.mark.asyncio
