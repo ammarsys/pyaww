@@ -12,7 +12,7 @@ from typing import (
     TypeVar,
     Hashable,
     Generator,
-    AsyncGenerator,
+    Union,
 )
 from collections.abc import MutableMapping
 
@@ -50,7 +50,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
 
     def __getitem__(self, item: KT) -> Optional[VT]:
         if item not in self:
-            return None
+            raise KeyError
 
         return self.cache[item][0]
 
@@ -79,9 +79,8 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
     def pop(self, key: KT) -> VT:
         return self.cache.pop(key)
 
-    async def natural_values(self) -> AsyncGenerator:
-        for data in self.cache.values():
-            yield data[0]
+    async def natural_values(self) -> list[VT]:
+        return [data[0] for data in self.cache.values()]
 
 
 class Cache:
@@ -92,7 +91,7 @@ class Cache:
         Each "type" (submodule) has its own get, set, delete and get all method. The types in question are,
         pyaww.Console, pyaww.AlwaysOnTask, pyaww.StaticFile, pyaww.StaticHeader, pyaww.WebApp and pyaww.File. Alongside
         each type, an instance variable (format: _type_cache) representing its cache will be created with the value
-        being pyaww.TTLCache.
+        being initialized pyaww.TTLCache.
 
         Anti-race-condition measures are taken into count here via asyncio.Lock().
         """
@@ -100,8 +99,8 @@ class Cache:
 
         self._console_cache: TTLCache[int, "Console"] = TTLCache()
 
-    async def all_consoles(self) -> AsyncGenerator:
-        return self._console_cache.natural_values()
+    async def all_personal_consoles(self) -> list["Console"]:
+        return await self._console_cache.natural_values()
 
     async def get_console(self, id_: int) -> Optional["Console"]:
         return self._console_cache.get(id_, None)
@@ -110,6 +109,13 @@ class Cache:
         async with self.lock:
             self._console_cache.pop(id_)
 
-    async def set_console(self, console: "Console") -> None:
+    async def set_console(self, console: Union["Console", list["Console"]]) -> None:
         async with self.lock:
-            self._console_cache[console.id] = console
+            if not isinstance(console, list):
+                console = [console]
+
+            for console in console:
+                if console.id in self._console_cache:
+                    continue  # present in cache, unnecessary calls
+
+                self._console_cache[console.id] = console
