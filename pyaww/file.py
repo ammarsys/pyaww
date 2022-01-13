@@ -41,6 +41,7 @@ class File:
         await self._user.request(
             "DELETE",
             f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+            return_json=True,
         )
 
     async def is_shared(self) -> bool:
@@ -49,6 +50,7 @@ class File:
             await self._user.request(
                 "GET",
                 f"/api/v0/user/{self._user.username}/files/sharing/?path={self.path}",
+                return_json=True,
             )
             return True
         except PythonAnywhereError:
@@ -63,8 +65,10 @@ class File:
     async def read(self) -> str:
         """Read the files content."""
         resp = await self._user.request(
-            "GET", f"/api/v0/user/{self._user.username}/files/path/{self.path}"
+            "GET",
+            f"/api/v0/user/{self._user.username}/files/path{self.path}"
         )
+
         return await resp.text()
 
     async def update(self, content: TextIO) -> None:
