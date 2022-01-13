@@ -1,10 +1,3 @@
-<div align="center">
-
-# Tests
-
-</div>
-<hr>
-
 This module uses the `pytest` library for its tests. Alongside the bare library, the following plugins for it are used:
 
 - `pytest-asyncio`
