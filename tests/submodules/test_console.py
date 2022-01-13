@@ -15,5 +15,9 @@ async def test_send_input(
 
 
 @pytest.mark.asyncio
-async def test_delete(unstarted_console: Console) -> None:  # cleanup + test
+async def test_delete(client, unstarted_console: Console) -> None:  # cleanup + test
+    await client.cache.set_console(unstarted_console)
+
     assert await unstarted_console.delete() is None
+
+    assert await client.cache.get_console(unstarted_console.id) is None
