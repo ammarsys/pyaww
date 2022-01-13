@@ -71,13 +71,23 @@ def client() -> User:
 @pytest.fixture
 async def unstarted_console(client) -> Console:
     """Create an unstarted console, this means you cannot send input to it"""
-    return await client.create_console(executable="bash")
+    console = await client.create_console(executable="bash")
+
+    assert isinstance(await client.cache.get_console(console.id), Console)
+    await client.cache.del_console(console.id)
+
+    return console
 
 
 @pytest.fixture
 async def started_console(client) -> Console:
     """Get a started console"""
-    return await client.get_console_by_id(id_=int(STARTED_CONSOLE))
+    console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
+
+    assert isinstance(await client.cache.get_console(console.id), Console)
+    await client.cache.del_console(console.id)
+
+    return console
 
 
 @pytest.fixture
