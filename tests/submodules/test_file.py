@@ -1,6 +1,7 @@
 # Related third party imports
 
 import pytest
+import aiohttp
 
 # Local application/library specific imports
 
@@ -9,17 +10,15 @@ from pyaww import File
 
 @pytest.mark.asyncio
 async def test_update(file: File) -> None:  # This also tests read.
-    with open("tests/assets/data.txt") as f:
+    with open("tests/assets/data.txt") as local_file:
 
-        # Prevent aiohttp from closing the file but allow the context manager to call __exit__
-        file_no_close = f
-        file_no_close.close = lambda: None
+        local_file_no_close = local_file
+        local_file_no_close.close = lambda: None
 
-        await file.update(file_no_close)
-        file = await file.read()
+        await file.update(local_file_no_close)
+        local_file_no_close.seek(0)
 
-        file_no_close.seek(0)
-        assert file == file_no_close.read()
+        assert local_file_no_close.read() == await file.read()
 
 
 @pytest.mark.asyncio
