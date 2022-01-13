@@ -96,12 +96,13 @@ class User:
         if not self.session:
             self.session = aiohttp.ClientSession()
 
-        async with await self.session.request(
-            method=method,
-            url=self.request_url + url,
-            headers=self.headers,
-            **kwargs,
-        ) as resp:
+        async with self.sem:
+            resp = await self.session.request(
+                method=method,
+                url=self.request_url + url,
+                headers=self.headers,
+                **kwargs,
+            )
             return await _parse_json(resp, return_json)
 
     async def get_cpu_info(self) -> dict:
@@ -115,35 +116,53 @@ class User:
             "GET", f"/api/v0/user/{self.username}/cpu/", return_json=True
         )
 
-    async def consoles(self) -> dict[str, list[Console]]:
+    async def shared_consoles(self) -> list[Console]:
         """
-        Return a list of consoles for the user.
+        Return shared consoles for the user. This is not being cached because shared consoles are accessed by several
+        people therefore, it's likely that the cache will be inaccurate.
 
         Returns:
-            Dict[str, List[Console]]:
-            dictionary with keys (personal, shared) and values of shared and personal consoles.
+            list[Console]: list of shared consoles
         """
+        return [
+            Console(console, self)
+            for console in await self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/consoles/shared_with_you/",
+                return_json=True,
+            )
+        ]
 
-        personal = await self.request(
-            "GET", f"/api/v0/user/{self.username}/consoles/", return_json=True
-        )
-        shared = await self.request(
-            "GET",
-            f"/api/v0/user/{self.username}/consoles/shared_with_you/",
-            return_json=True,
-        )
+    async def consoles(self) -> list[Console]:
+        """
+        Return a list of personal consoles for the user.
 
-        return {
-            "personal": [Console(console, self) for console in personal],
-            "shared": [Console(console, self) for console in shared],
-        }
+        Returns:
+            list[Console]: list of shared personal consoles
+        """
+        consoles = await self.cache.all_personal_consoles() or [
+            Console(console, self)
+            for console in await self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/consoles//",
+                return_json=True,
+            )
+        ]
+        await self.cache.set_console(consoles)
+
+        return consoles
 
     async def get_console_by_id(self, id_: int) -> Console:
         """Get a console by its id."""
-        resp = await self.request(
-            "GET", f"/api/v0/user/{self.username}/consoles/{id_}", return_json=True
+        console = await self.cache.get_console(id_) or Console(
+            await self.request(
+                "GET", f"/api/v0/user/{self.username}/consoles/{id_}", return_json=True
+            ),
+            self,
         )
-        return Console(resp, self)
+        await self.cache.set_console(console)
+
+        return console
 
     async def create_console(
         self, executable: str, workingdir: str = None, arguments: str = ""
@@ -177,10 +196,13 @@ class User:
                 },
             )
         except json.decoder.JSONDecodeError:
-            resp = None  # Just for linters (local var resp might be referenced before assigment)
             raise_error((429, "Console limit reached."))
 
-        return Console(resp, self)
+        # noinspection PyUnboundLocalVariable
+        console = Console(resp, self)
+        await self.cache.set_console(console)
+
+        return console
 
     async def listdir(
         self, path: str, recursive: bool = False, only_subdirectories: bool = True

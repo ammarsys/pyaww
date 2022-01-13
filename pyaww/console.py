@@ -57,6 +57,8 @@ class Console:
         """Delete the console."""
         await self._user.request("DELETE", "/api/v0" + self.console_url)
 
+        await self._user.cache.del_console(self.id)
+
     async def outputs(self) -> str:
         """Return all outputs in the console."""
         resp = await self._user.request(
