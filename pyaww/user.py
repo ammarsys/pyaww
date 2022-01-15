@@ -140,7 +140,7 @@ class User:
         Returns:
             list[Console]: list of shared personal consoles
         """
-        consoles = await self.cache.all('console') or [
+        consoles = await self.cache.all("console") or [
             Console(console, self)
             for console in await self.request(
                 "GET",
@@ -148,19 +148,19 @@ class User:
                 return_json=True,
             )
         ]
-        await self.cache.set('console', object_=consoles)
+        await self.cache.set("console", object_=consoles)
 
         return consoles
 
     async def get_console_by_id(self, id_: int) -> Console:
         """Get a console by its id."""
-        console = await self.cache.get('console', id_=id_) or Console(
+        console = await self.cache.get("console", id_=id_) or Console(
             await self.request(
                 "GET", f"/api/v0/user/{self.username}/consoles/{id_}", return_json=True
             ),
             self,
         )
-        await self.cache.set('console', object_=console)
+        await self.cache.set("console", object_=console)
 
         return console
 
@@ -200,7 +200,7 @@ class User:
 
         # noinspection PyUnboundLocalVariable
         console = Console(resp, self)
-        await self.cache.set('console', object_=console)
+        await self.cache.set("console", object_=console)
 
         return console
 
@@ -300,25 +300,25 @@ class User:
 
     async def scheduled_tasks(self) -> list[SchedTask]:
         """Get scheduled tasks."""
-        sched_tasks = await self.cache.all('sched_task') or [
+        sched_tasks = await self.cache.all("sched_task") or [
             SchedTask(sched_task, self)
             for sched_task in await self.request(
                 "GET", f"/api/v0/user/{self.username}/schedule/", return_json=True
             )
         ]
-        await self.cache.set('sched_task', object_=sched_tasks)
+        await self.cache.set("sched_task", object_=sched_tasks)
 
         return sched_tasks
 
     async def get_sched_task_by_id(self, id_: int) -> SchedTask:
         """Get a scheduled task via it's id."""
-        sched_task = await self.cache.get('sched_task', id_=id_) or SchedTask(
+        sched_task = await self.cache.get("sched_task", id_=id_) or SchedTask(
             await self.request(
                 "GET", f"/api/v0/user/{self.username}/schedule/{id_}/", return_json=True
             ),
             self,
         )
-        await self.cache.set('sched_task', object_=sched_task)
+        await self.cache.set("sched_task", object_=sched_task)
 
         return sched_task
 
@@ -365,7 +365,7 @@ class User:
             ),
             self,
         )
-        await self.cache.set('sched_task', object_=sched_task)
+        await self.cache.set("sched_task", object_=sched_task)
 
         return sched_task
 

@@ -73,8 +73,8 @@ async def unstarted_console(client) -> Console:
     """Create an unstarted console, this means you cannot send input to it"""
     console = await client.create_console(executable="bash")
 
-    assert isinstance(await client.cache.get('console', id_=console.id), Console)
-    await client.cache.pop('console', id_=console.id)
+    assert isinstance(await client.cache.get("console", id_=console.id), Console)
+    await client.cache.pop("console", id_=console.id)
 
     return console
 
@@ -84,8 +84,8 @@ async def started_console(client) -> Console:
     """Get a started console"""
     console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
 
-    assert isinstance(await client.cache.get('console', id_=console.id), Console)
-    await client.cache.pop('console', id_=console.id)
+    assert isinstance(await client.cache.get("console", id_=console.id), Console)
+    await client.cache.pop("console", id_=console.id)
 
     return console
 
@@ -115,8 +115,10 @@ async def scheduled_task(client: User) -> SchedTask:
         command="echo hello world", hour="5", minute="5"
     )
 
-    assert isinstance(await client.cache.get('sched_task', id_=sched_task.id), SchedTask)
-    await client.cache.pop('sched_task', id_=sched_task.id)
+    assert isinstance(
+        await client.cache.get("sched_task", id_=sched_task.id), SchedTask
+    )
+    await client.cache.pop("sched_task", id_=sched_task.id)
 
     return sched_task
 

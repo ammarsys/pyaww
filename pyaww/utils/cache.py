@@ -102,8 +102,8 @@ class Cache:
         self._sched_task_cache: TTLCache[int, "SchedTask"] = TTLCache()
 
         self._submodule_dict: dict[str, TTLCache] = {
-            'console': self._console_cache,
-            'sched_task': self._sched_task_cache
+            "console": self._console_cache,
+            "sched_task": self._sched_task_cache,
         }  # PA support 3.10 smh
 
     async def all(self, submodule: str) -> list[Any]:

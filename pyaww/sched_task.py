@@ -37,7 +37,7 @@ class SchedTask:
     async def delete(self) -> None:
         """Delete the task."""
         await self._user.request("DELETE", self.url)
-        await self._user.cache.pop('sched_task', id_=self.id)
+        await self._user.cache.pop("sched_task", id_=self.id)
 
     async def update(self, **kwargs) -> None:
         """

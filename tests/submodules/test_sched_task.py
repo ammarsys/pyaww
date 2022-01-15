@@ -16,8 +16,8 @@ async def test_update(scheduled_task: SchedTask) -> None:
 
 @pytest.mark.asyncio
 async def test_delete(client, scheduled_task: SchedTask) -> None:
-    await client.cache.set('sched_task', object_=scheduled_task)
+    await client.cache.set("sched_task", object_=scheduled_task)
 
     assert await scheduled_task.delete() is None
 
-    assert await client.cache.get('sched_task', scheduled_task.id) is None
+    assert await client.cache.get("sched_task", scheduled_task.id) is None
