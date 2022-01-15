@@ -4,7 +4,7 @@ import pytest
 
 # Local application/library specific imports
 
-from pyaww import SchedTask, User
+from pyaww import SchedTask
 
 
 @pytest.mark.asyncio
@@ -15,10 +15,9 @@ async def test_update(scheduled_task: SchedTask) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_sched_task_by_id(client: User, scheduled_task: SchedTask) -> None:
-    assert await client.get_sched_task_by_id(scheduled_task.id) == scheduled_task
+async def test_delete(client, scheduled_task: SchedTask) -> None:
+    await client.cache.set('sched_task', object_=scheduled_task)
 
-
-@pytest.mark.asyncio
-async def test_delete(scheduled_task: SchedTask) -> None:
     assert await scheduled_task.delete() is None
+
+    assert await client.cache.get('sched_task', scheduled_task.id) is None
