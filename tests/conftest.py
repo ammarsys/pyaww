@@ -111,9 +111,14 @@ async def student_name() -> str:
 @pytest.fixture(scope="session")
 async def scheduled_task(client: User) -> SchedTask:
     """Create a scheduled task"""
-    return await client.create_sched_task(
+    sched_task = await client.create_sched_task(
         command="echo hello world", hour="5", minute="5"
     )
+
+    assert isinstance(await client.cache.get('sched_task', id_=sched_task.id), SchedTask)
+    await client.cache.pop('sched_task', id_=sched_task.id)
+
+    return sched_task
 
 
 @pytest.fixture
