@@ -140,7 +140,7 @@ class User:
         Returns:
             list[Console]: list of shared personal consoles
         """
-        consoles = await self.cache.all_personal_consoles() or [
+        consoles = await self.cache.all('console') or [
             Console(console, self)
             for console in await self.request(
                 "GET",
@@ -148,19 +148,19 @@ class User:
                 return_json=True,
             )
         ]
-        await self.cache.set_console(consoles)
+        await self.cache.set('console', object_=consoles)
 
         return consoles
 
     async def get_console_by_id(self, id_: int) -> Console:
         """Get a console by its id."""
-        console = await self.cache.get_console(id_) or Console(
+        console = await self.cache.get('console', id_=id_) or Console(
             await self.request(
                 "GET", f"/api/v0/user/{self.username}/consoles/{id_}", return_json=True
             ),
             self,
         )
-        await self.cache.set_console(console)
+        await self.cache.set('console', object_=console)
 
         return console
 
@@ -200,7 +200,7 @@ class User:
 
         # noinspection PyUnboundLocalVariable
         console = Console(resp, self)
-        await self.cache.set_console(console)
+        await self.cache.set('console', object_=console)
 
         return console
 
@@ -290,30 +290,37 @@ class User:
         except json.decoder.JSONDecodeError:
             pass
 
-    async def tasks(self) -> dict[str, list]:
-        """
-        Get tasks for the user.
-
-        Returns:
-            dictionary containing both scheduled and always_on tasks
-        """
-        schedules = await self.request(
-            "GET", f"/api/v0/user/{self.username}/schedule/", return_json=True
-        )
+    async def always_on_tasks(self) -> list[AlwaysOnTask]:
+        """Get always on tasks"""
         always_on = await self.request(
             "GET", f"/api/v0/user/{self.username}/always_on", return_json=True
         )
-        return {
-            "scheduled_tasks": [SchedTask(i, self) for i in schedules],
-            "always_on_tasks": [AlwaysOnTask(i, self) for i in always_on],
-        }
+
+        return [AlwaysOnTask(i, self) for i in always_on]
+
+    async def scheduled_tasks(self) -> list[SchedTask]:
+        """Get scheduled tasks."""
+        sched_tasks = await self.cache.all('sched_task') or [
+            SchedTask(sched_task, self)
+            for sched_task in await self.request(
+                "GET", f"/api/v0/user/{self.username}/schedule/", return_json=True
+            )
+        ]
+        await self.cache.set('sched_task', object_=sched_tasks)
+
+        return sched_tasks
 
     async def get_sched_task_by_id(self, id_: int) -> SchedTask:
         """Get a scheduled task via it's id."""
-        resp = await self.request(
-            "GET", f"/api/v0/user/{self.username}/schedule/{id_}/", return_json=True
+        sched_task = await self.cache.get('sched_task', id_=id_) or SchedTask(
+            await self.request(
+                "GET", f"/api/v0/user/{self.username}/schedule/{id_}/", return_json=True
+            ),
+            self,
         )
-        return SchedTask(resp, self)
+        await self.cache.set('sched_task', object_=sched_task)
+
+        return sched_task
 
     async def create_sched_task(
         self,
@@ -342,22 +349,25 @@ class User:
         Returns:
             SchedTask
         """
-        data = {
-            "command": command,
-            "enabled": enabled,
-            "interval": interval,
-            "hour": hour,
-            "minute": minute,
-            "description": description,
-        }
-
-        resp = await self.request(
-            "POST",
-            f"/api/v0/user/{self.username}/schedule/",
-            return_json=True,
-            data=data,
+        sched_task = SchedTask(
+            await self.request(
+                "POST",
+                f"/api/v0/user/{self.username}/schedule/",
+                return_json=True,
+                data={
+                    "command": command,
+                    "enabled": enabled,
+                    "interval": interval,
+                    "hour": hour,
+                    "minute": minute,
+                    "description": description,
+                },
+            ),
+            self,
         )
-        return SchedTask(resp, self)
+        await self.cache.set('sched_task', object_=sched_task)
+
+        return sched_task
 
     async def create_always_on_task(
         self, command: str, description: str = "", enabled: bool = True
