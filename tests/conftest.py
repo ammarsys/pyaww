@@ -73,8 +73,8 @@ async def unstarted_console(client) -> Console:
     """Create an unstarted console, this means you cannot send input to it"""
     console = await client.create_console(executable="bash")
 
-    assert isinstance(await client.cache.get_console(console.id), Console)
-    await client.cache.del_console(console.id)
+    assert isinstance(await client.cache.get('console', id_=console.id), Console)
+    await client.cache.pop('console', id_=console.id)
 
     return console
 
@@ -84,8 +84,8 @@ async def started_console(client) -> Console:
     """Get a started console"""
     console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
 
-    assert isinstance(await client.cache.get_console(console.id), Console)
-    await client.cache.del_console(console.id)
+    assert isinstance(await client.cache.get('console', id_=console.id), Console)
+    await client.cache.pop('console', id_=console.id)
 
     return console
 
