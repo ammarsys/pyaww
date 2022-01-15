@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import Iterator
+from typing import Iterator, TYPE_CHECKING
 from types import AsyncGeneratorType
 
 # Related third party imports
@@ -8,6 +8,9 @@ from types import AsyncGeneratorType
 import pytest
 
 # Local application/library specific imports
+
+if TYPE_CHECKING:
+    from pyaww import SchedTask
 
 from pyaww import User, InvalidInfo
 
@@ -40,12 +43,18 @@ async def test_remove_student(client: User, student_name: str) -> None:
 
 @pytest.mark.asyncio
 async def test_get_tasks(client: User) -> None:
-    assert isinstance(await client.tasks(), dict)
+    assert isinstance(await client.scheduled_tasks(), list)
+    assert isinstance(await client.always_on_tasks(), list)
 
 
 @pytest.mark.asyncio
 async def test_get_python_versions(client: User) -> None:
     assert isinstance(await client.python_versions(), list)
+
+
+@pytest.mark.asyncio
+async def test_get_sched_task_by_id(client: User, scheduled_task: "SchedTask") -> None:
+    assert await client.get_sched_task_by_id(scheduled_task.id) == scheduled_task
 
 
 @pytest.mark.asyncio
