@@ -13,13 +13,14 @@ from typing import (
     Hashable,
     Generator,
     Union,
+    Any,
 )
 from collections.abc import MutableMapping
 
 # Local application/library specific imports
 
 if TYPE_CHECKING:
-    from pyaww import Console
+    from pyaww import Console, SchedTask
 
 
 KT = TypeVar("KT", bound=Hashable)
@@ -88,9 +89,9 @@ class Cache:
         """
         Main caching class for the module.
 
-        Each "type" (submodule) has its own get, set, delete and get all method. The types in question are,
-        pyaww.Console, pyaww.AlwaysOnTask, pyaww.StaticFile, pyaww.StaticHeader, pyaww.WebApp and pyaww.File. Alongside
-        each type, an instance variable (format: _type_cache) representing its cache will be created with the value
+        Each "type" (submodule) has its own get, set, delete, get_all and a record in the _submodule_dict instance variable
+        . The types in question are, pyaww.Console, pyaww.AlwaysOnTask, pyaww.StaticFile, pyaww.StaticHeader,
+        pyaww.WebApp and pyaww.File. Alongside each type, an instance variable (format: _type_cache) representing its cache will be created with the value
         being initialized pyaww.TTLCache.
 
         Anti-race-condition measures are taken into count here via asyncio.Lock().
@@ -98,24 +99,36 @@ class Cache:
         self.lock = asyncio.Lock()
 
         self._console_cache: TTLCache[int, "Console"] = TTLCache()
+        self._sched_task_cache: TTLCache[int, "SchedTask"] = TTLCache()
 
-    async def all_personal_consoles(self) -> list["Console"]:
-        return await self._console_cache.natural_values()
+        self._submodule_dict: dict[str, TTLCache] = {
+            'console': self._console_cache,
+            'sched_task': self._sched_task_cache
+        }  # PA support 3.10 smh
 
-    async def get_console(self, id_: int) -> Optional["Console"]:
-        return self._console_cache.get(id_, None)
+    async def all(self, submodule: str) -> list[Any]:
+        type_ = self._submodule_dict[submodule]
+        return await type_.natural_values()
 
-    async def del_console(self, id_: int) -> None:
+    async def get(self, submodule: str, id_: int) -> Optional[Any]:
+        type_ = self._submodule_dict[submodule]
+        return type_.get(id_, None)
+
+    async def pop(self, submodule: str, id_: int) -> None:
+        type_ = self._submodule_dict[submodule]
+
         async with self.lock:
-            self._console_cache.pop(id_)
+            type_.pop(id_)
 
-    async def set_console(self, console: Union["Console", list["Console"]]) -> None:
+    async def set(self, submodule: str, object_: Union[Any, list[Any]]):
+        type_ = self._submodule_dict[submodule]
+
         async with self.lock:
-            if not isinstance(console, list):
-                console = [console]
+            if not isinstance(object_, list):
+                object_ = [object_]
 
-            for console in console:
-                if console.id in self._console_cache:
+            for object_ in object_:
+                if object_.id in type_:
                     continue  # present in cache, unnecessary calls
 
-                self._console_cache[console.id] = console
+                type_[object_.id] = object_
