@@ -22,7 +22,6 @@ from collections.abc import MutableMapping
 if TYPE_CHECKING:
     from pyaww import Console, SchedTask
 
-
 KT = TypeVar("KT", bound=Hashable)
 VT = TypeVar("VT")
 
@@ -47,17 +46,17 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
 
     def __init__(self, ttl_time: int = 30):
         self.ttl = ttl_time
-        self.cache: dict[KT, tuple[VT, datetime.datetime]] = {}
+        self.cache: dict[KT, tuple[VT, bool, datetime.datetime]] = {}
 
     def __getitem__(self, item: KT) -> Optional[VT]:
         if item not in self:
             raise KeyError
 
-        return self.cache[item][0]
+        return self.cache[item]
 
     def __contains__(self, item: KT) -> bool:
         try:
-            _, dt = self.cache[item]
+            _, _, dt = self.cache[item]
 
             if not _check_if_expired(dt):
                 return True
@@ -66,7 +65,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
         return False
 
     def __setitem__(self, key: KT, value: VT) -> None:
-        self.cache[key] = (value, _time(self.ttl))
+        self.cache[key] = value + (_time(self.ttl),)
 
     def __len__(self) -> int:
         return len(self.cache)
@@ -80,8 +79,17 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
     def pop(self, key: KT) -> VT:
         return self.cache.pop(key)
 
+    def __str__(self) -> str:
+        return str(self.cache)
+
     async def natural_values(self) -> list[VT]:
-        return [data[0] for data in self.cache.values()]
+        to_return: list[VT] = []
+
+        for x in self.cache.values():
+            if x[1]:
+                to_return.append(x[0])
+
+        return to_return
 
 
 class Cache:
@@ -111,8 +119,11 @@ class Cache:
         return await type_.natural_values()
 
     async def get(self, submodule: str, id_: int) -> Optional[Any]:
-        type_ = self._submodule_dict[submodule]
-        return type_.get(id_, None)
+        data = self._submodule_dict[submodule].get(id_, None)
+
+        if data is not None:
+            return data[0]
+        return data
 
     async def pop(self, submodule: str, id_: int) -> None:
         type_ = self._submodule_dict[submodule]
@@ -120,7 +131,21 @@ class Cache:
         async with self.lock:
             type_.pop(id_)
 
-    async def set(self, submodule: str, object_: Union[Any, list[Any]]):
+    async def set(self, submodule: str, object_: Union[Any, list[Any]], allow_all_usage: bool = False) -> None:
+        """
+        Set something in the cache.
+
+        Args:
+            submodule (str): cached submodule from the pyaww dir
+            object_ (Union[Any, list[Any]): object to set in cache
+            allow_all_usage (bool): if set to true it will appear in the list that Cache.all returns.
+
+        Further explanation on allow_all_usage argument:
+            The reason for this argument is because the submodules' cache may be innacurate if the creator method
+            (e.g create_console) is called before the list method (e.g consoles) since, creator method will populate the
+            cache and list methods cache call statement will not evaluate to None and thus the request won't be called,
+            potentionally missing out some API results.
+        """
         type_ = self._submodule_dict[submodule]
 
         async with self.lock:
@@ -128,7 +153,4 @@ class Cache:
                 object_ = [object_]
 
             for object_ in object_:
-                if object_.id in type_:
-                    continue  # present in cache, unnecessary calls
-
-                type_[object_.id] = object_
+                type_[object_.id] = (object_, allow_all_usage)
