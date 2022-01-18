@@ -1,6 +1,6 @@
 import pyaww
 
-client = pyaww.User(..., ...)
+client = pyaww.User('...', '...')
 
 
 async def update_file(path: str) -> None:

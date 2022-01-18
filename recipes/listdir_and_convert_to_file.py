@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 import pyaww
 
-client = pyaww.User(..., ...)
+client = pyaww.User('...', '...')
 
 
 async def listpath(path: str) -> AsyncIterator:

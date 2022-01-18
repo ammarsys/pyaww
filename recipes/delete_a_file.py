@@ -1,6 +1,6 @@
 import pyaww
 
-client = pyaww.User(..., ...)
+client = pyaww.User('...', '...')
 
 
 async def delete_file_by_path(path: str) -> None:
