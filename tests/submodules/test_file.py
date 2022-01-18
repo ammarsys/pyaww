@@ -13,7 +13,7 @@ async def test_update(file: File) -> None:  # This also tests read.
     with open("tests/assets/data.txt") as local_file:
 
         local_file_no_close = local_file
-        local_file_no_close.close = lambda: None
+        local_file_no_close.close = lambda: None  # type: ignore
 
         await file.update(local_file_no_close)
         local_file_no_close.seek(0)
