@@ -35,8 +35,8 @@ from dotenv import dotenv_values
 
 values = dotenv_values("tests/assets/.env")
 
-USERNAME = values["USERNAME"]
-AUTH = values["AUTH"]
+USERNAME = str(values["USERNAME"])
+AUTH = str(values["AUTH"])
 STARTED_CONSOLE = values["STARTED_CONSOLE"]
 
 TEST_PATH_TO_LISTDIR = f"/home/{USERNAME}/"
@@ -88,7 +88,7 @@ async def unstarted_console(client) -> Console:
 @pytest.fixture
 async def started_console(client) -> Console:
     """Get a started console"""
-    console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
+    console = await client.get_console_by_id(id_=STARTED_CONSOLE)
 
     assert isinstance(await client.cache.get("console", id_=console.id), Console)
     assert not await client.cache.all("console")
