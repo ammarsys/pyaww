@@ -148,7 +148,7 @@ class User:
                 return_json=True,
             )
         ]
-        await self.cache.set("console", object_=consoles)
+        await self.cache.set("console", object_=consoles, allow_all_usage=True)
 
         return consoles
 
@@ -306,7 +306,7 @@ class User:
                 "GET", f"/api/v0/user/{self.username}/schedule/", return_json=True
             )
         ]
-        await self.cache.set("sched_task", object_=sched_tasks)
+        await self.cache.set("sched_task", object_=sched_tasks, allow_all_usage=True)
 
         return sched_tasks
 
