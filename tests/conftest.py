@@ -12,6 +12,7 @@ Basically, create an account, start a console, fill out the env file.
 # Standard library imports
 
 import asyncio
+import sys
 from typing import AsyncIterator
 
 # Related third party imports
@@ -45,6 +46,10 @@ TEST_RELATIVE_PATH_TO_FILE = r"tests/assets/data.txt"
 TEST_STUDENT_TO_REMOVE = "ANYTHING_HERE"
 
 
+if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     # It's safe to ignore these warnings.
@@ -74,6 +79,7 @@ async def unstarted_console(client) -> Console:
     console = await client.create_console(executable="bash")
 
     assert isinstance(await client.cache.get("console", id_=console.id), Console)
+    assert not await client.cache.all("console")
     await client.cache.pop("console", id_=console.id)
 
     return console
@@ -85,6 +91,7 @@ async def started_console(client) -> Console:
     console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
 
     assert isinstance(await client.cache.get("console", id_=console.id), Console)
+    assert not await client.cache.all("console")
     await client.cache.pop("console", id_=console.id)
 
     return console
@@ -118,6 +125,7 @@ async def scheduled_task(client: User) -> SchedTask:
     assert isinstance(
         await client.cache.get("sched_task", id_=sched_task.id), SchedTask
     )
+    assert not await client.cache.all("sched_task")
     await client.cache.pop("sched_task", id_=sched_task.id)
 
     return sched_task
