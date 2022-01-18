@@ -68,7 +68,6 @@ class User:
         """
         self.use_cache = True
         self.cache = Cache()
-        self.disable_cache = {}
 
         self.from_eu = from_eu
         self.username = username
