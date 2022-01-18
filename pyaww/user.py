@@ -90,7 +90,7 @@ class User:
 
     async def request(
         self, method: str, url: str, return_json: bool = False, **kwargs
-    ) -> Union[aiohttp.ClientResponse, Any]:
+    ) -> Any:
         """Request function for the module"""
 
         if not self.session:
