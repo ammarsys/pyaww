@@ -59,4 +59,6 @@ class SchedTask:
         return self.url
 
     def __eq__(self, other):
-        return self.url == other.url
+        if isinstance(other, SchedTask):
+            return self.id == other.id
+        return False
