@@ -46,7 +46,11 @@ TEST_RELATIVE_PATH_TO_FILE = r"tests/assets/data.txt"
 TEST_STUDENT_TO_REMOVE = "ANYTHING_HERE"
 
 
-if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+if (
+    sys.version_info[0] == 3
+    and sys.version_info[1] >= 8
+    and sys.platform.startswith("win")
+):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 

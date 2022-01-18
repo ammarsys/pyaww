@@ -131,7 +131,12 @@ class Cache:
         async with self.lock:
             type_.pop(id_)
 
-    async def set(self, submodule: str, object_: Union[Any, list[Any]], allow_all_usage: bool = False) -> None:
+    async def set(
+        self,
+        submodule: str,
+        object_: Union[Any, list[Any]],
+        allow_all_usage: bool = False,
+    ) -> None:
         """
         Set something in the cache.
 
