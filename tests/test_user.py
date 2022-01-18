@@ -30,6 +30,8 @@ async def test_get_consoles(client) -> None:
     assert isinstance(await client.consoles(), list)
     assert isinstance(await client.shared_consoles(), list)
 
+    assert await client.cache.all("console")
+
 
 @pytest.mark.asyncio
 async def test_get_students(client: User) -> None:
