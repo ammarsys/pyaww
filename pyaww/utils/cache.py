@@ -48,7 +48,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
         self.ttl = ttl_time
         self.cache: dict[KT, tuple[VT, bool, datetime.datetime]] = {}
 
-    def __getitem__(self, item: KT) -> Optional[VT]:
+    def __getitem__(self, item: KT) -> VT:
         if item not in self:
             raise KeyError
 
