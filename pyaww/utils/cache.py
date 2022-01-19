@@ -76,7 +76,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
     def __delitem__(self, key: KT) -> None:
         del self.cache[key]
 
-    def pop(self, key) -> VT:
+    def pop(self, key):
         return self.cache.pop(key)[0]
 
     def __str__(self) -> str:
