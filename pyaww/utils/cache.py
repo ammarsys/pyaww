@@ -54,7 +54,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
 
         return self.cache[item][0]
 
-    def __contains__(self, item: KT) -> bool:  # type: ignore
+    def __contains__(self, item) -> bool:
         try:
             _, _, dt = self.cache[item]
 
