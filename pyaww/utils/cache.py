@@ -65,7 +65,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
         return False
 
     def __setitem__(self, key: KT, value: VT) -> None:
-        self.cache[key] = value + (_time(self.ttl),)
+        self.cache[key] = value + (_time(self.ttl),)  # type: ignore
 
     def __len__(self) -> int:
         return len(self.cache)
