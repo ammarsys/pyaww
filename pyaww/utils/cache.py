@@ -52,7 +52,7 @@ class TTLCache(MutableMapping[KT, VT], Generic[KT, VT]):
         if item not in self:
             raise KeyError
 
-        return self.cache[item]
+        return self.cache[item][0]
 
     def __contains__(self, item: KT) -> bool:
         try:
@@ -119,11 +119,7 @@ class Cache:
         return await type_.natural_values()
 
     async def get(self, submodule: str, id_: int) -> Optional[Any]:
-        data = self._submodule_dict[submodule].get(id_, None)
-
-        if data is not None:
-            return data[0]
-        return data
+        return self._submodule_dict[submodule].get(id_, None)
 
     async def pop(self, submodule: str, id_: int) -> None:
         type_ = self._submodule_dict[submodule]
