@@ -1,6 +1,6 @@
 import pyaww
 
-client = pyaww.user.User('...', '...')
+client = pyaww.user.User("...", "...")
 
 my_webapp = pyaww.WebApp(
     {

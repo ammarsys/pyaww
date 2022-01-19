@@ -1,6 +1,6 @@
 import pyaww
 
-client = pyaww.User('...', '...')
+client = pyaww.User("...", "...")
 
 
 async def kill_all_personal_consoles() -> None:
