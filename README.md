@@ -17,7 +17,7 @@ An API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`n
 - 100% API coverage, 100% tested
 - Object-oriented
 - Fully documented & Typehinted
-- Caching & Ratelimiting handled
+- Caching handled
 
 We strive to provide an easy-to-use, batteries included modern API wrapper. The documentation can be found [here](https://pyaww-docs.vercel.app/), 
 for help please open an [issue](https://github.com/ammarsys/pyaww/issues).
@@ -48,7 +48,7 @@ import pyaww
 import asyncio
 
 # construct the user class
-client = pyaww.User(auth=..., username=...)
+client = pyaww.User("sexychad420", "my-python-anywhere-token")
 
 async def cpu() -> dict:
     """Gets the CPU information."""
@@ -58,16 +58,15 @@ asyncio.run(cpu())
 ```
 
 Using this module within PythonAnywhere webapps might be a little tricky as they only support WSGI at the moment.
-However, you can run the function calls synchronously if your desired web framework doesn't support async syntax.
-Some back-end frameworks such as `flask` [support](https://flask.palletsprojects.com/en/2.0.x/async-await/) async syntax
-in the routes, example:
-
+However, you can run the function calls synchronously with `asyncio` module if your desired web framework doesn't 
+support async syntax. Some back-end frameworks such as `flask` 
+[support](https://flask.palletsprojects.com/en/2.0.x/async-await/) async syntax in the routes, example:
 ```py
 from flask import Flask
-from pyaww import User
+import pyaww
 
 app = Flask(__name__)
-client = User("...", "...")
+client = pyaww.User("sexychad420", "my-python-anywhere-token")
 
 @app.route("/")
 async def cpu_usage():
