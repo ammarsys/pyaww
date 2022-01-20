@@ -56,3 +56,26 @@ async def cpu() -> dict:
 
 asyncio.run(cpu())
 ```
+
+Using this module within PythonAnywhere webapps might be a little tricky as they only support WSGI at the moment.
+However, you can run the function calls synchronously if your desired web framework doesn't support async syntax.
+Some back-end frameworks such as `flask` [support](https://flask.palletsprojects.com/en/2.0.x/async-await/) async syntax
+in the routes, example:
+
+```py
+from flask import Flask
+from pyaww import User
+
+app = Flask(__name__)
+client = User("...", "...")
+
+@app.route("/")
+async def cpu_usage():
+    return await client.get_cpu_info()
+
+if __name__ == '__main__':
+    app.run()
+```
+
+If there is no way that you can use the `async/await` syntax within your webapp, you can downgrade to `>3.0.0` versions
+of this module.
