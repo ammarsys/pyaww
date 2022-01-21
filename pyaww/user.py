@@ -514,3 +514,6 @@ class User:
 
     def __str__(self):
         return str(self.headers)
+
+    def __eq__(self, other):
+        return self.headers == getattr(other, 'headers', None)

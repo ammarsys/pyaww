@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 # Local application/library specific imports
 
@@ -69,3 +69,6 @@ class Console:
 
     def __str__(self):
         return self.console_url
+
+    def __eq__(self, other):
+        return self.id == getattr(other, 'id', None)
