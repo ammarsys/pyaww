@@ -198,4 +198,4 @@ class WebApp:
         return self.domain_name
 
     def __eq__(self, other):
-        return self.domain_name == other.domain_name
+        return self.domain_name == getattr(other, 'domain_name', None)

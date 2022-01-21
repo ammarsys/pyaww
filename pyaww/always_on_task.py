@@ -52,4 +52,4 @@ class AlwaysOnTask:
         return self.url
 
     def __eq__(self, other):
-        return self.url == other.url
+        return self.url == getattr(other, 'url', None)
