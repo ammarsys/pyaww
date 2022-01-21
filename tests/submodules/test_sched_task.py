@@ -8,10 +8,13 @@ from pyaww import SchedTask
 
 
 @pytest.mark.asyncio
-async def test_update(scheduled_task: SchedTask) -> None:
+async def test_update(client, scheduled_task: SchedTask) -> None:
     await scheduled_task.update(description="A")
     await scheduled_task.update(description="B")
     assert scheduled_task.description == "B"
+
+    cached = await client.cache.get('sched_task', scheduled_task.id)
+    assert scheduled_task.description == cached.description
 
 
 @pytest.mark.asyncio
