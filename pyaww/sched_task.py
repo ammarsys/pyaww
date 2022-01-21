@@ -40,12 +40,12 @@ class SchedTask:
         await self._user.cache.pop("sched_task", id_=self.id)
 
     async def update(
-            self,
-            command: Optional[str] = None,
-            minute: Optional[str] = None,
-            hour: Optional[str] = None,
-            interval: Optional[str] = None,
-            description: Optional[str] = None
+        self,
+        command: Optional[str] = None,
+        minute: Optional[str] = None,
+        hour: Optional[str] = None,
+        interval: Optional[str] = None,
+        description: Optional[str] = None,
     ) -> None:
         """
         Updates the task. All times are in UTC.

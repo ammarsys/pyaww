@@ -18,7 +18,7 @@ async def test_update(client: "User", scheduled_task: "SchedTask") -> None:
     await scheduled_task.update(description="B")
     assert scheduled_task.description == "B"
 
-    cached = await client.cache.get('sched_task', scheduled_task.id)
+    cached = await client.cache.get("sched_task", scheduled_task.id)
     assert scheduled_task.description == cached.description  # type: ignore
 
 

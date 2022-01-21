@@ -13,7 +13,9 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.asyncio
-async def test_get_static_file_by_id(static_file: "StaticFile", webapp: "WebApp") -> None:
+async def test_get_static_file_by_id(
+    static_file: "StaticFile", webapp: "WebApp"
+) -> None:
     assert await webapp.get_static_file_by_id(static_file.id) == static_file
 
 

@@ -92,7 +92,7 @@ async def unstarted_console(client) -> Console:
 @pytest.fixture
 async def started_console(client) -> Console:
     """Get a started console"""
-    console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
+    console = await client.get_console_by_id(id_=STARTED_CONSOLE)
 
     assert isinstance(await client.cache.get("console", id_=console.id), Console)
     assert not await client.cache.all("console")
