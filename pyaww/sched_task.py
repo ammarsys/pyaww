@@ -71,6 +71,8 @@ class SchedTask:
         await self._user.request("PATCH", self.url, data=data)
         vars(self).update(data)
 
+        await self._user.cache.set("sched_task", object_=self)
+
     def __str__(self):
         return self.url
 
