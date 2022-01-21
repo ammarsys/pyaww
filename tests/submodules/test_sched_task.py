@@ -19,7 +19,7 @@ async def test_update(client: "User", scheduled_task: "SchedTask") -> None:
     assert scheduled_task.description == "B"
 
     cached = await client.cache.get('sched_task', scheduled_task.id)
-    assert scheduled_task.description == cached.description
+    assert scheduled_task.description == cached.description  # type: ignore
 
 
 @pytest.mark.asyncio
