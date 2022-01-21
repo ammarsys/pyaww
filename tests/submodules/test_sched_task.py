@@ -1,14 +1,19 @@
+# Standard library imports
+
+from typing import TYPE_CHECKING
+
 # Related third party imports
 
 import pytest
 
 # Local application/library specific imports
 
-from pyaww import SchedTask
+if TYPE_CHECKING:
+    from pyaww import SchedTask, User
 
 
 @pytest.mark.asyncio
-async def test_update(client, scheduled_task: SchedTask) -> None:
+async def test_update(client: "User", scheduled_task: "SchedTask") -> None:
     await scheduled_task.update(description="A")
     await scheduled_task.update(description="B")
     assert scheduled_task.description == "B"
@@ -18,7 +23,7 @@ async def test_update(client, scheduled_task: SchedTask) -> None:
 
 
 @pytest.mark.asyncio
-async def test_delete(client, scheduled_task: SchedTask) -> None:
+async def test_delete(client: "User", scheduled_task: "SchedTask") -> None:
     await client.cache.set("sched_task", object_=scheduled_task)
 
     assert await scheduled_task.delete() is None

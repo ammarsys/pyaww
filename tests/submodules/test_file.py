@@ -1,15 +1,19 @@
+# Standard library imports
+
+from typing import TYPE_CHECKING
+
 # Related third party imports
 
 import pytest
-import aiohttp
 
 # Local application/library specific imports
 
-from pyaww import File
+if TYPE_CHECKING:
+    from pyaww import File
 
 
 @pytest.mark.asyncio
-async def test_update(file: File) -> None:  # This also tests read.
+async def test_update(file: "File") -> None:  # This also tests read.
     with open("tests/assets/data.txt") as local_file:
 
         local_file_no_close = local_file
@@ -22,20 +26,20 @@ async def test_update(file: File) -> None:  # This also tests read.
 
 
 @pytest.mark.asyncio
-async def test_share(file: File) -> None:
+async def test_share(file: "File") -> None:
     assert isinstance(await file.share(), str)
 
 
 @pytest.mark.asyncio
-async def test_unshare(file: File) -> None:
+async def test_unshare(file: "File") -> None:
     assert await file.unshare() is None
 
 
 @pytest.mark.asyncio
-async def test_sharing_status(file: File) -> None:
+async def test_sharing_status(file: "File") -> None:
     assert await file.is_shared() is False
 
 
 @pytest.mark.asyncio
-async def test_delete(file: File) -> None:
+async def test_delete(file: "File") -> None:
     assert await file.delete() is None

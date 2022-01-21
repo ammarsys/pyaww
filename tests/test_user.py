@@ -9,10 +9,10 @@ import pytest
 
 # Local application/library specific imports
 
+from pyaww import User, InvalidInfo
+
 if TYPE_CHECKING:
     from pyaww import SchedTask
-
-from pyaww import User, InvalidInfo
 
 
 def test_bad_client_token() -> None:

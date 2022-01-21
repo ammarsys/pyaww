@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 # Local application/library specific imports
 
-from .sched_task import SchedTask
-
 if TYPE_CHECKING:
     from .user import User
 
@@ -19,6 +17,7 @@ class AlwaysOnTask:
 
     url: str
     id: int
+    description: str
     ...
 
     def __init__(self, resp: dict, user: "User") -> None:

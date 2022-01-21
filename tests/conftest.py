@@ -13,7 +13,7 @@ Basically, create an account, start a console, fill out the env file.
 
 import asyncio
 import sys
-from typing import AsyncIterator
+from typing import AsyncIterator, TYPE_CHECKING
 
 # Related third party imports
 
@@ -23,15 +23,15 @@ import pytest
 
 from pyaww import (
     User,
-    File,
     Console,
     SchedTask,
-    WebApp,
     StaticFile,
-    StaticHeader,
     PythonAnywhereError,
 )
 from dotenv import dotenv_values
+
+if TYPE_CHECKING:
+    from pyaww import StaticHeader, File, WebApp
 
 values = dotenv_values("tests/assets/.env")
 
@@ -64,7 +64,7 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def webapp(client: User) -> WebApp:
+async def webapp(client: User) -> "WebApp":
     """Construct a webapp"""
     return await client.create_webapp(
         domain_name=f"{USERNAME}.pythonanywhere.com", python_version="python39"
@@ -92,7 +92,7 @@ async def unstarted_console(client) -> Console:
 @pytest.fixture
 async def started_console(client) -> Console:
     """Get a started console"""
-    console = await client.get_console_by_id(id_=STARTED_CONSOLE)
+    console = await client.get_console_by_id(id_=int(STARTED_CONSOLE))
 
     assert isinstance(await client.cache.get("console", id_=console.id), Console)
     assert not await client.cache.all("console")
@@ -108,7 +108,7 @@ async def contents_of_a_path(client) -> AsyncIterator[str]:
 
 
 @pytest.fixture
-async def file(client: User) -> File:
+async def file(client: User) -> "File":
     with open(TEST_RELATIVE_PATH_TO_FILE, "r") as file:
         return await client.create_file(TEST_PATH_FOR_NEW_FILE, file)
 
@@ -147,7 +147,7 @@ async def always_on_task(client: User):
 
 
 @pytest.fixture
-async def static_file(webapp: WebApp) -> StaticFile:
+async def static_file(webapp: "WebApp") -> StaticFile:
     """Create a static file. Webapp restart required."""
     static_file = await webapp.create_static_file(
         file_path=f"/home/{USERNAME}/README.txt", url="PYAWW URL FIXTURE"
@@ -157,7 +157,7 @@ async def static_file(webapp: WebApp) -> StaticFile:
 
 
 @pytest.fixture(scope="session")
-async def static_header(webapp: WebApp) -> StaticHeader:
+async def static_header(webapp: "WebApp") -> "StaticHeader":
     """Create a static file. Webapp restart required."""
     static_header = await webapp.create_static_header(
         value={"PYAWW KEY": "PYAWW VALUE"},

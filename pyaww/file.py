@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING, TextIO, Any
+from typing import TYPE_CHECKING, TextIO
 
 # Local application/library specific imports
 
