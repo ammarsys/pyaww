@@ -506,11 +506,11 @@ class User:
         )  # does not return all the necessary data for pyaww.WebApps init
         return await self.get_webapp_by_domain_name(domain_name=domain_name)
 
-    def __aenter__(self):
+    async def __aenter__(self):
         return self
 
-    def __aexit__(self, exc_type, exc_val, exc_tb):
-        self.session.close().__await__()
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.session.close()
 
     def __str__(self):
         return str(self.headers)
