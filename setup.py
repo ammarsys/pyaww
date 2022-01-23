@@ -26,7 +26,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=["pyaww"],
-    install_requires=["aiohttp==3.7.4"],
+    install_requires=["aiohttp==3.8.1"],
     python_requires=">=3.9",
     license="MIT",
 )
