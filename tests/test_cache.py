@@ -1,5 +1,6 @@
 # Standard library imports
 
+import copy
 from typing import NoReturn
 
 # Related third party imports
@@ -21,10 +22,7 @@ class MockUser(User):
 
 @pytest.mark.asyncio
 async def test_disable_cache_methods(client: "User") -> None:
-    client_seperate = MockUser(
-        username=client.username,
-        auth=client.headers["Authorization"].split("Token ")[1],
-    )
+    client_seperate = copy.copy(client)
     original = client_seperate.request
 
     client_seperate.cache.use_cache = False
