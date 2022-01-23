@@ -46,7 +46,7 @@ class WebApp:
 
     async def update(
             self,
-            python_version: Optional[str] = None,
+            python_version: Optional[float] = None,
             source_directory: Optional[str] = None,
             virtualenv_path: Optional[str] = None,
             force_https: Optional[bool] = None,
@@ -55,7 +55,7 @@ class WebApp:
             password_protection_password: Optional[str] = None,
     ) -> None:
         """Updates config of the webapp. Reload required."""
-        data = {}
+        data: dict[str, Any] = {}
 
         if python_version is not None:
             data["python_version"] = python_version
@@ -68,7 +68,7 @@ class WebApp:
         if password_protection_enabled is not None:
             data["password_protection_enabled"] = password_protection_enabled
         if password_protection_password is not None:
-            data["password_protection_pasword"] = password_protection_enabled
+            data["password_protection_pasword"] = password_protection_password
         if password_protection_username is not None:
             data["password_protection_username"] = password_protection_username
 
