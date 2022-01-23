@@ -107,8 +107,8 @@ class Cache:
         self._sched_task_cache: TTLCache[int, "SchedTask"] = TTLCache()
 
         self.use_cache = True
-        self.disable_cache_for_identifier = {}
-        self.disable_cache_for_module = {}
+        self.disable_cache_for_identifier = set()
+        self.disable_cache_for_module = set()
 
         self._submodule_dict: dict[str, TTLCache] = {
             "console": self._console_cache,
