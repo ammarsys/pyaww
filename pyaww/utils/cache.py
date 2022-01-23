@@ -119,7 +119,7 @@ class Cache:
         type_ = self._submodule_dict[submodule]
 
         if submodule in self.disable_cache_for_module or not self.use_cache:
-            return
+            return None
 
         return await type_.natural_values()
 
@@ -127,7 +127,7 @@ class Cache:
         type_ = self._submodule_dict[submodule]
 
         if submodule in self.disable_cache_for_module or not self.use_cache or id_ in self.disable_cache_for_identifier:
-            return
+            return None
 
         return type_.get(id_, None)
 
