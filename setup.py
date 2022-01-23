@@ -16,6 +16,7 @@ setuptools.setup(
     url="https://github.com/ammarsys/pyaww/",
     project_urls={
         "Bug Tracker": "https://github.com/ammarsys/pyaww/issues",
+        "Documentation": "https://pyaww-docs.vercel.app/",
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
