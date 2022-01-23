@@ -33,13 +33,13 @@ class AlwaysOnTask:
         await self._user.request("DELETE", self.url)
 
     async def update(
-            self,
-            command: Optional[str] = None,
-            minute: Optional[str] = None,
-            hour: Optional[str] = None,
-            interval: Optional[str] = None,
-            description: Optional[str] = None,
-            enabled: Optional[bool] = None,
+        self,
+        command: Optional[str] = None,
+        minute: Optional[str] = None,
+        hour: Optional[str] = None,
+        interval: Optional[str] = None,
+        description: Optional[str] = None,
+        enabled: Optional[bool] = None,
     ) -> None:
         """
         Updates the task. All times are in UTC.

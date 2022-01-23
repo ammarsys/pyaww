@@ -45,14 +45,14 @@ class WebApp:
         )
 
     async def update(
-            self,
-            python_version: Optional[float] = None,
-            source_directory: Optional[str] = None,
-            virtualenv_path: Optional[str] = None,
-            force_https: Optional[bool] = None,
-            password_protection_enabled: Optional[bool] = None,
-            password_protection_username: Optional[str] = None,
-            password_protection_password: Optional[str] = None,
+        self,
+        python_version: Optional[float] = None,
+        source_directory: Optional[str] = None,
+        virtualenv_path: Optional[str] = None,
+        force_https: Optional[bool] = None,
+        password_protection_enabled: Optional[bool] = None,
+        password_protection_username: Optional[str] = None,
+        password_protection_password: Optional[str] = None,
     ) -> None:
         """Updates config of the webapp. Reload required."""
         data: dict[str, Any] = {}

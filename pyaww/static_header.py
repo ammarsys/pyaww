@@ -26,10 +26,10 @@ class StaticHeader:
         await self._webapp.userclass.request("DELETE", self._url)
 
     async def update(
-            self,
-            url: Optional[str] = None,
-            name: Optional[str] = None,
-            value: Optional[Any] = None
+        self,
+        url: Optional[str] = None,
+        name: Optional[str] = None,
+        value: Optional[Any] = None,
     ) -> None:
         """Update the static header. Webapp restart required."""
         data = {}
