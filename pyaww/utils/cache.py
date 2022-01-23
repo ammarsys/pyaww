@@ -151,4 +151,5 @@ class Cache:
                 object_ = [object_]
 
             for object_ in object_:
-                type_[object_.id] = (object_, allow_all_usage)
+                async with self.lock:
+                    type_[object_.id] = (object_, allow_all_usage)
