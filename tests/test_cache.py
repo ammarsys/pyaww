@@ -1,0 +1,52 @@
+# Related third party imports
+
+import pytest
+
+# Local application/library specific imports
+
+from pyaww import User
+
+
+async def mock_request_func(*args, **kwargs) -> None:
+    raise NotImplementedError("request function not implemented")
+
+
+class MockUser(User):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_disable_cache_methods(client: "User") -> None:
+    client_seperate = MockUser(username=client.username, auth=client.headers["Authorization"].split('Token ')[1])
+    original = client_seperate.request
+
+    client_seperate.cache.use_cache = False
+    client_seperate.cache._console_cache.cache = {}  # type: ignore
+
+    client_seperate.request = mock_request_func
+
+    with pytest.raises(NotImplementedError):
+        await client_seperate.consoles()
+
+    client_seperate.request = original
+    consoles = await client_seperate.consoles()  # populate the cache
+    client_seperate.request = mock_request_func
+
+    client_seperate.cache.disable_cache_for_identifier.add(consoles[0].id)
+
+    with pytest.raises(NotImplementedError):
+        await client_seperate.get_console_by_id(consoles[0].id)
+
+    client_seperate.cache.disable_cache_for_identifier = set()
+    client_seperate.cache.disable_cache_for_module.add('console')
+
+    with pytest.raises(NotImplementedError):
+        await client_seperate.consoles()
+
+
+
+
+
+
+
+
