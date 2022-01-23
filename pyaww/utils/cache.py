@@ -94,10 +94,9 @@ class Cache:
         """
         Main caching class for the module.
 
-        Each "type" (submodule) has its own get, set, delete, get_all and a record in the _submodule_dict instance
-        variable. The types in question are, pyaww.Console, pyaww.AlwaysOnTask, pyaww.StaticFile, pyaww.StaticHeader,
-        pyaww.WebApp and pyaww.File. Alongside each type, an instance variable (format: _type_cache) representing its
-        cache will be created with the value being initialized pyaww.TTLCache.
+        Each implemented "type" (submodule) has its own get, set, delete, get_all and a record in the _submodule_dict
+        instance variable. Alongside each type, an instance variable (format: _type_cache) representing its cache will
+        be created with the value being initialized pyaww.TTLCache.
 
         Anti-race-condition measures are taken into count here via asyncio.Lock().
         """
