@@ -60,9 +60,3 @@ you're good to go!
 3. Ensure your CWD is `pyaww` and not `pyaww/tests` or similar.
 4. Run `py -m pytest -s`.
 5. Fix if anything is wrong, if not, your tests are fine.
-
-## What is currently our TODO for 0.0.4 version?
-
-### Ratelimiting (see issue 2)
-- 40/minute for everything except console inputs where it is 120/min
-- leaky bucket
