@@ -1,7 +1,7 @@
 # Standard library imports
 
 import copy
-from typing import NoReturn
+from typing import NoReturn, TYPE_CHECKING
 
 # Related third party imports
 
@@ -9,15 +9,12 @@ import pytest
 
 # Local application/library specific imports
 
-from pyaww import User
+if TYPE_CHECKING:
+    from pyaww import User
 
 
 async def mock_request_func(*args, **kwargs) -> NoReturn:
     raise NotImplementedError("request function not implemented")
-
-
-class MockUser(User):
-    pass
 
 
 @pytest.mark.asyncio
