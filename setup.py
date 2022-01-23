@@ -10,7 +10,7 @@ setuptools.setup(
     version="1.0.0",
     author="ammarsys",
     author_email="amarftw1@gmail.com",
-    description="A simple API wrapper around the pythonanywhere's API.",
+    description="An API wrapper around the PythonAnywhere's API.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ammarsys/pyaww/",
@@ -26,7 +26,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=["pyaww"],
-    install_requires=["typing_extensions==3.10.0.0", "requests==2.25.1"],
+    install_requires=["aiohttp==3.7.4"],
     python_requires=">=3.9",
     license="MIT",
 )
