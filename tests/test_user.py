@@ -56,7 +56,9 @@ async def test_get_python_versions(client: User) -> None:
 
 @pytest.mark.asyncio
 async def test_get_sched_task_by_id(client: User, scheduled_task: "SchedTask") -> None:
-    assert await client.get_sched_task_by_id(scheduled_task.id) == scheduled_task, "IDs between two instances do not match (__eq__)"
+    assert (
+        await client.get_sched_task_by_id(scheduled_task.id) == scheduled_task
+    ), "IDs between two instances do not match (__eq__)"
 
 
 @pytest.mark.asyncio
