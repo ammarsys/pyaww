@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 # Local application/library specific imports
 
@@ -44,20 +44,40 @@ class WebApp:
             "DELETE", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/"
         )
 
-    async def update(self, **kwargs) -> None:
-        """
-        Updates config of the webapp. Reload required.
+    async def update(
+            self,
+            python_version: Optional[str] = None,
+            source_directory: Optional[str] = None,
+            virtualenv_path: Optional[str] = None,
+            force_https: Optional[bool] = None,
+            password_protection_enabled: Optional[bool] = None,
+            password_protection_username: Optional[str] = None,
+            password_protection_password: Optional[str] = None,
+    ) -> None:
+        """Updates config of the webapp. Reload required."""
+        data = {}
 
-        Args:
-            **kwargs: can take: python_version, source_directory, virtualenv_path, force_https,
-            password_protection_enabled, password_protection_username, password_protection_password
-        """
+        if python_version is not None:
+            data["python_version"] = python_version
+        if source_directory is not None:
+            data["source_directory"] = source_directory
+        if virtualenv_path is not None:
+            data["virtualend_path"] = virtualenv_path
+        if force_https is not None:
+            data["force_https"] = force_https
+        if password_protection_enabled is not None:
+            data["password_protection_enabled"] = password_protection_enabled
+        if password_protection_password is not None:
+            data["password_protection_pasword"] = password_protection_enabled
+        if password_protection_username is not None:
+            data["password_protection_username"] = password_protection_username
+
         await self._user.request(
             "PATCH",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/",
-            data=kwargs,
+            data=data,
         )
-        vars(self).update(kwargs)
+        vars(self).update(data)
 
     async def restart(self) -> None:
         """Reloads the webapp."""

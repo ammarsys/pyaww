@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Any
 
 # Local library/library specific imports
 
@@ -25,15 +25,24 @@ class StaticHeader:
         """Delete the static header. Webapp restart required."""
         await self._webapp.userclass.request("DELETE", self._url)
 
-    async def update(self, **kwargs) -> None:
-        """
-        Update the static header. Webapp restart required.
+    async def update(
+            self,
+            url: Optional[str] = None,
+            name: Optional[str] = None,
+            value: Optional[Any] = None
+    ) -> None:
+        """Update the static header. Webapp restart required."""
+        data = {}
 
-        Args:
-            **kwargs: takes url, name, value
-        """
-        await self._webapp.userclass.request("PATCH", self._url, data=kwargs)
-        vars(self).update(kwargs)
+        if url is not None:
+            data["url"] = url
+        if name is not None:
+            data["name"] = name
+        if value is not None:
+            data["value"] = value
+
+        await self._webapp.userclass.request("PATCH", self._url, data=data)
+        vars(self).update(data)
 
     def __str__(self):
         return self.url

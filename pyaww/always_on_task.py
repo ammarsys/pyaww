@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 # Local application/library specific imports
 
@@ -32,21 +32,40 @@ class AlwaysOnTask:
         """Delete the task."""
         await self._user.request("DELETE", self.url)
 
-    async def update(self, **kwargs) -> None:
+    async def update(
+            self,
+            command: Optional[str] = None,
+            minute: Optional[str] = None,
+            hour: Optional[str] = None,
+            interval: Optional[str] = None,
+            description: Optional[str] = None,
+            enabled: Optional[bool] = None,
+    ) -> None:
         """
         Updates the task. All times are in UTC.
-
-        Args:
-            **kwargs: command str, minute str, hour str, interval str, description str,
-            enabled bool
 
         Examples:
             >>> user = User(...)
             >>> task = await user.get_always_on_task_by_id(...)
             >>> await task.update(command='cd')
         """
-        await self._user.request("PATCH", self.url, data=kwargs)
-        vars(self).update(kwargs)
+        data = {}
+
+        if command is not None:
+            data["command"] = command
+        if minute is not None:
+            data["minute"] = minute
+        if hour is not None:
+            data["hour"] = hour
+        if interval is not None:
+            data["interval"] = interval
+        if description is not None:
+            data["description"] = description
+        if enabled is not None:
+            data["enabled"] = description
+
+        await self._user.request("PATCH", self.url, data=data)
+        vars(self).update(data)
 
     def __str__(self):
         return self.url
