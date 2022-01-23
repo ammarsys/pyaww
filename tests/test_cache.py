@@ -21,16 +21,16 @@ async def test_disable_cache_methods(client: "User") -> None:
     original = client_seperate.request
 
     client_seperate.cache.use_cache = False
-    client_seperate.cache._console_cache.cache = {}  # type: ignore
+    client_seperate.cache._console_cache.cache = {}
 
-    client_seperate.request = mock_request_func
+    client_seperate.request = mock_request_func  # type: ignore
 
     with pytest.raises(NotImplementedError):
         await client_seperate.consoles()
 
-    client_seperate.request = original
+    client_seperate.request = original  # type: ignore
     consoles = await client_seperate.consoles()  # populate the cache
-    client_seperate.request = mock_request_func
+    client_seperate.request = mock_request_func  # type: ignore
 
     client_seperate.cache.disable_cache_for_identifier.add(consoles[0].id)
 
