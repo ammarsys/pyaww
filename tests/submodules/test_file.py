@@ -22,7 +22,7 @@ async def test_update(file: "File") -> None:  # This also tests read.
         await file.update(local_file_no_close)
         local_file_no_close.seek(0)
 
-        assert local_file_no_close.read() == await file.read()
+        assert local_file_no_close.read() == await file.read(), "contents of local file failed to match one on the server"
 
 
 @pytest.mark.asyncio

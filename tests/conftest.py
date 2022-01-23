@@ -82,8 +82,8 @@ async def unstarted_console(client) -> Console:
     """Create an unstarted console, this means you cannot send input to it"""
     console = await client.create_console(executable="bash")
 
-    assert isinstance(await client.cache.get("console", id_=console.id), Console)
-    assert not await client.cache.all("console")
+    assert isinstance(await client.cache.get("console", id_=console.id), Console), "create console method failed to cache"
+    assert not await client.cache.all("console"), "cache failed to utilise allow_all_usage argument"
     await client.cache.pop("console", id_=console.id)
 
     return console
@@ -94,8 +94,8 @@ async def started_console(client) -> Console:
     """Get a started console"""
     console = await client.get_console_by_id(id_=STARTED_CONSOLE)
 
-    assert isinstance(await client.cache.get("console", id_=console.id), Console)
-    assert not await client.cache.all("console")
+    assert isinstance(await client.cache.get("console", id_=console.id), Console), "get console method failed to cache"
+    assert not await client.cache.all("console"), "cache failed to utilise allow_all_usage argument"
     await client.cache.pop("console", id_=console.id)
 
     return console
@@ -128,8 +128,8 @@ async def scheduled_task(client: User) -> SchedTask:
 
     assert isinstance(
         await client.cache.get("sched_task", id_=sched_task.id), SchedTask
-    )
-    assert not await client.cache.all("sched_task")
+    ), "create sched task method failed to cache"
+    assert not await client.cache.all("sched_task"), "cache failed to utilise allow_all_usage argument"
     await client.cache.pop("sched_task", id_=sched_task.id)
 
     return sched_task
