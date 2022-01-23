@@ -1,3 +1,7 @@
+# Standard library imports
+
+from typing import NoReturn
+
 # Related third party imports
 
 import pytest
@@ -7,7 +11,7 @@ import pytest
 from pyaww import User
 
 
-async def mock_request_func(*args, **kwargs) -> None:
+async def mock_request_func(*args, **kwargs) -> NoReturn:
     raise NotImplementedError("request function not implemented")
 
 
