@@ -17,7 +17,10 @@ class MockUser(User):
 
 @pytest.mark.asyncio
 async def test_disable_cache_methods(client: "User") -> None:
-    client_seperate = MockUser(username=client.username, auth=client.headers["Authorization"].split('Token ')[1])
+    client_seperate = MockUser(
+        username=client.username,
+        auth=client.headers["Authorization"].split("Token ")[1],
+    )
     original = client_seperate.request
 
     client_seperate.cache.use_cache = False
@@ -38,15 +41,7 @@ async def test_disable_cache_methods(client: "User") -> None:
         await client_seperate.get_console_by_id(consoles[0].id)
 
     client_seperate.cache.disable_cache_for_identifier = set()
-    client_seperate.cache.disable_cache_for_module.add('console')
+    client_seperate.cache.disable_cache_for_module.add("console")
 
     with pytest.raises(NotImplementedError):
         await client_seperate.consoles()
-
-
-
-
-
-
-
-

@@ -77,4 +77,4 @@ class SchedTask:
         return self.url
 
     def __eq__(self, other):
-        return self.id == getattr(other, 'id', None)
+        return self.id == getattr(other, "id", None)

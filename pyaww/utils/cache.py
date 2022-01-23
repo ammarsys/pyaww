@@ -126,7 +126,11 @@ class Cache:
     async def get(self, submodule: str, id_: int) -> Optional[Any]:
         type_ = self._submodule_dict[submodule]
 
-        if submodule in self.disable_cache_for_module or not self.use_cache or id_ in self.disable_cache_for_identifier:
+        if (
+            submodule in self.disable_cache_for_module
+            or not self.use_cache
+            or id_ in self.disable_cache_for_identifier
+        ):
             return None
 
         return type_.get(id_, None)
