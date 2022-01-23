@@ -106,17 +106,30 @@ class Cache:
         self._console_cache: TTLCache[int, "Console"] = TTLCache()
         self._sched_task_cache: TTLCache[int, "SchedTask"] = TTLCache()
 
+        self.use_cache = True
+        self.disable_cache_for_identifier = {}
+        self.disable_cache_for_module = {}
+
         self._submodule_dict: dict[str, TTLCache] = {
             "console": self._console_cache,
             "sched_task": self._sched_task_cache,
         }  # PA support 3.10 smh
 
-    async def all(self, submodule: str) -> list[Any]:
+    async def all(self, submodule: str) -> Optional[list[Any]]:
         type_ = self._submodule_dict[submodule]
+
+        if submodule in self.disable_cache_for_module or not self.use_cache:
+            return
+
         return await type_.natural_values()
 
     async def get(self, submodule: str, id_: int) -> Optional[Any]:
-        return self._submodule_dict[submodule].get(id_, None)
+        type_ = self._submodule_dict[submodule]
+
+        if submodule in self.disable_cache_for_module or not self.use_cache or id_ in self.disable_cache_for_identifier:
+            return
+
+        return type_.get(id_, None)
 
     async def pop(self, submodule: str, id_: int) -> None:
         type_ = self._submodule_dict[submodule]
@@ -146,10 +159,12 @@ class Cache:
         """
         type_ = self._submodule_dict[submodule]
 
+        if submodule in self.disable_cache_for_module or not self.use_cache:
+            return
+
         async with self.lock:
             if not isinstance(object_, list):
                 object_ = [object_]
 
             for object_ in object_:
-                async with self.lock:
-                    type_[object_.id] = (object_, allow_all_usage)
+                type_[object_.id] = (object_, allow_all_usage)
