@@ -517,3 +517,9 @@ class User:
 
     def __eq__(self, other):
         return self.headers == getattr(other, "headers", None)
+
+    def __copy__(self) -> "User":
+        return User(
+            username=self.username,
+            auth=self.headers["Authorization"].split("Token ")[1],
+        )
