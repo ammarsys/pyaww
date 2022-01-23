@@ -1,6 +1,6 @@
 # Standard library imports
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Any
 
 # Local application/library specific imports
 
@@ -49,7 +49,7 @@ class AlwaysOnTask:
             >>> task = await user.get_always_on_task_by_id(...)
             >>> await task.update(command='cd')
         """
-        data = {}
+        data: dict[str, Any] = {}
 
         if command is not None:
             data["command"] = command
@@ -62,7 +62,7 @@ class AlwaysOnTask:
         if description is not None:
             data["description"] = description
         if enabled is not None:
-            data["enabled"] = description
+            data["enabled"] = enabled
 
         await self._user.request("PATCH", self.url, data=data)
         vars(self).update(data)
