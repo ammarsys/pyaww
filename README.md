@@ -6,6 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/pyaww.svg)](https://badge.fury.io/py/pyaww)
 [![Code Size](https://img.shields.io/github/languages/code-size/ammarsys/pyaww)](https://img.shields.io/github/languages/code-size/ammarsys/pyaww)
+![Commit activity](https://img.shields.io/github/commit-activity/w/ammarsys/pyaww)
+
 </div>
 <hr>
 
