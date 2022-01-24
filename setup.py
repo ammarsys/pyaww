@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pyaww",
-    version="1.0.0",
+    version="1.0.5",
     author="ammarsys",
     author_email="amarftw1@gmail.com",
     description="An API wrapper around the PythonAnywhere's API.",
@@ -26,7 +26,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Operating System :: OS Independent",
     ],
-    packages=["pyaww"],
+    packages=setuptools.find_packages(),
     install_requires=["aiohttp==3.8.1"],
     python_requires=">=3.9",
     license="MIT",
