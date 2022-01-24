@@ -17,7 +17,7 @@ from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
 from .errors import raise_error
-from .utils.cache import Cache
+from .utils import Cache
 
 
 async def _parse_json(
