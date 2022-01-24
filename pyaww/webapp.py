@@ -1,8 +1,6 @@
-"""Class for webapp API endpoints"""
-
 # Standard library imports
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 # Local application/library specific imports
 
@@ -15,7 +13,16 @@ if TYPE_CHECKING:
 
 
 class WebApp:
-    """Contains all methods of a webapp."""
+    """
+    Implements WebApp endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/WebAppBasics/
+
+    Constructors:
+        `WebApp.static_files`;`WebApp.create_static_file`;`WebApp.get_static_file_by_id` -> **StaticFile**
+
+        `WebApp.static_headers`;`WebApp.create_static_header`;`WebApp.get_static_header_by_id` -> **StaicHeader**
+    """
 
     id: int
     user: str
@@ -28,81 +35,106 @@ class WebApp:
     force_https: bool
 
     def __init__(self, resp: dict, user: "User") -> None:
-        self._user = user
+        self._user: "User" = user
         vars(self).update(resp)
 
-    def delete(self) -> None:
-        """Deletes a webapp."""
-        self._user.request(
+    async def delete(self) -> None:
+        """Deletes the webapp."""
+        await self._user.request(
             "DELETE", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/"
         )
 
-    def update(self, **kwargs) -> None:
-        """
-        Updates config of a webapp. Restart required.
+    async def update(
+        self,
+        python_version: Optional[float] = None,
+        source_directory: Optional[str] = None,
+        virtualenv_path: Optional[str] = None,
+        force_https: Optional[bool] = None,
+        password_protection_enabled: Optional[bool] = None,
+        password_protection_username: Optional[str] = None,
+        password_protection_password: Optional[str] = None,
+    ) -> None:
+        """Updates config of the webapp. Reload required."""
+        data: dict[str, Any] = {}
 
-        Args:
-            **kwargs: can take: python_version, source_directory, virtualenv_path, force_https
-        """
-        self._user.request(
+        if python_version is not None:
+            data["python_version"] = python_version
+        if source_directory is not None:
+            data["source_directory"] = source_directory
+        if virtualenv_path is not None:
+            data["virtualend_path"] = virtualenv_path
+        if force_https is not None:
+            data["force_https"] = force_https
+        if password_protection_enabled is not None:
+            data["password_protection_enabled"] = password_protection_enabled
+        if password_protection_password is not None:
+            data["password_protection_pasword"] = password_protection_password
+        if password_protection_username is not None:
+            data["password_protection_username"] = password_protection_username
+
+        await self._user.request(
             "PATCH",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/",
-            data=kwargs,
+            data=data,
         )
-        vars(self).update(kwargs)
+        vars(self).update(data)
 
-    def reload(self) -> None:
+    async def restart(self) -> None:
         """Reloads the webapp."""
-        self._user.request(
+        await self._user.request(
             "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/reload/"
         )
 
-    def disable(self) -> None:
+    async def disable(self) -> None:
         """Disables the webapp."""
-        self._user.request(
+        await self._user.request(
             "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/disable/"
         )
 
-    def enable(self) -> None:
+    async def enable(self) -> None:
         """Enables the webapp."""
         try:
-            self._user.request(
+            await self._user.request(
                 "POST", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/enable/"
             )
         except PythonAnywhereError:
             pass
 
-    def get_ssl_info(self) -> dict:
+    async def get_ssl_info(self) -> dict:
         """Gets TLS/HTTP info of the webapp."""
-        return self._user.request(
-            "GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/"
-        ).json()
+        return await self._user.request(
+            "GET",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/",
+            return_json=True,
+        )
 
-    def set_ssl_info(self, cert: str, private_key: str) -> None:
+    async def set_ssl_info(self, cert: str, private_key: str) -> None:
         """
-        Set the TLS/HTTP info. Webapp restart required.
+        Set the TLS/HTTP info. Webapp reload required.
 
         Args:
             cert (str): TLS/HTTP certificate
             private_key (str): TLS/HTTP private key
         """
         data = {"cert": cert, "private_key": private_key}
-        self._user.request(
+        await self._user.request(
             "POST",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/ssl/",
             data=data,
-        ).json()
+        )
 
-    def static_files(self) -> list[StaticFile]:
-        """Gets webapps static files."""
-        resp = self._user.request(
-            "GET", f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/"
-        ).json()
+    async def static_files(self) -> list[StaticFile]:
+        """Gets the webapps static files."""
+        resp = await self._user.request(
+            "GET",
+            f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
+            return_json=True,
+        )
         return [StaticFile(i, self) for i in resp]
 
-    def create_static_file(self, file_path: str, url: str = None) -> StaticFile:
+    async def create_static_file(self, file_path: str, url: str) -> StaticFile:
         """
-        Create a static file. Static files can be loaded much faster of disk. Webapp restart required.
+        Create a static file. Webapp reload required.
 
         Args:
             file_path (str): path of the file
@@ -112,15 +144,15 @@ class WebApp:
             StaticFile
         """
         data = {"path": file_path, "url": url}
-        resp = self._user.request(
+        resp = await self._user.request(
             "POST",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/",
+            return_json=True,
             data=data,
-        ).json()
-
+        )
         return StaticFile(resp, self)
 
-    def get_static_file_by_id(self, id_: int) -> StaticFile:
+    async def get_static_file_by_id(self, id_: int) -> StaticFile:
         """
         Get a static file via it's id.
 
@@ -130,30 +162,35 @@ class WebApp:
         Returns:
             StaticFile
         """
-        resp = self._user.request(
+        resp = await self._user.request(
             "GET",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_files/{id_}/",
-        ).json()
+            return_json=True,
+        )
         return StaticFile(resp, self)
 
-    def static_headers(self) -> list[dict]:
+    async def static_headers(self) -> list[dict]:
         """Get webapps static headers."""
-        return self._user.request(
+        return await self._user.request(
             "GET",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
-        ).json()
+            return_json=True,
+        )
 
-    def get_static_header_by_id(self, id_: int) -> StaticHeader:
+    async def get_static_header_by_id(self, id_: int) -> StaticHeader:
         """Get a static header by it's id."""
-        resp = self._user.request(
+        resp = await self._user.request(
             "GET",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/{id_}/",
-        ).json()
+            return_json=True,
+        )
         return StaticHeader(resp, self)
 
-    def create_static_header(self, url: str, name: str, value: dict) -> StaticHeader:
+    async def create_static_header(
+        self, url: str, name: str, value: dict
+    ) -> StaticHeader:
         """
-        Create a static header for the webapp. Webapp restart required.
+        Create a static header for the webapp. Webapp reload required.
 
         Args:
             url (str): url for the static header
@@ -164,20 +201,21 @@ class WebApp:
             StaticHeader
         """
         data = {"url": url, "name": name, "value": value}
-        resp = self._user.request(
+        resp = await self._user.request(
             "POST",
             f"/api/v0/user/{self.user}/webapps/{self.domain_name}/static_headers/",
+            return_json=True,
             data=data,
-        ).json()
+        )
         return StaticHeader(resp, self)
 
     @property
     def userclass(self):
-        """Property for accessing a protected member so it doesn't violate PEP8"""
+        """Property for accessing pyaww.User"""
         return self._user
 
     def __str__(self):
         return self.domain_name
 
     def __eq__(self, other):
-        return self.domain_name == other.domain_name
+        return self.domain_name == getattr(other, "domain_name", None)

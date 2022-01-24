@@ -1,44 +1,82 @@
-"""
-A lightweight API wrapper around the PythonAnywhere's API.
-
-The documentations are located at https://ammarsys.github.io/pyaww-docs/
-
-License: MIT
-"""
-
 # Standard library imports
 
+import asyncio
 import json
-from typing import Iterator, Optional, TextIO
+
+from typing import AsyncIterator, Optional, TextIO, Union, Any
 
 # Related third party imports
 
-import requests
+import aiohttp
 
 # Local application/library specific imports
+
 from .console import Console
 from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
 from .errors import raise_error
-from utils.utils import cache_func, update_cached_function
+from .utils import Cache
+
+
+async def _parse_json(
+    resp: aiohttp.ClientResponse, return_json: bool
+) -> Union[dict, aiohttp.ClientResponse]:
+    """Parse the JSON and raise errors."""
+    if not return_json:
+        return resp
+
+    jsoned = await resp.json(content_type=None)
+
+    if jsoned:
+        for key in ("detail", "error", "error_message", "non_field_errors"):
+            if key in jsoned:
+                raise_error((resp.status, jsoned[key]))
+
+    return jsoned
 
 
 class User:
-    """The brain of the operation. All modules are connected to this class in one way or another."""
+    """
+    The brain of the operation. All modules are connected to this class in one way or another.
 
-    def __init__(self, username: str, auth: str, from_eu: bool = False) -> None:
+    Constructors:
+        `User.create_console`;`User.get_console_by_id`;`User.consoles()`  -> **Console**
+
+        `User.get_file_by_path`;`User.create_file` -> **File**
+
+        `User.tasks`;`User.get_sched_task_by_id`;`User.create_sched_task` -> **SchedTask**
+
+        `User.tasks`;`User.create_always_on_task`;`User.get_always_on_task_by_id` -> **AlwaysOnTask**
+
+        `User.get_webapp_by_domain_name`;`User.webapps`;`User.create_webapp` -> **WebApp**
+    """
+
+    def __init__(
+        self,
+        username: str,
+        auth: str,
+        async_session: aiohttp.ClientSession = None,
+        from_eu: bool = False,
+    ) -> None:
         """
         Args:
             username (str): Username of the account
             auth (str): API token of the account
             from_eu (bool): Whether you are from europe or not, because European accounts API URL is different
         """
+        self.use_cache = True
+        self.cache = Cache()
+
         self.from_eu = from_eu
         self.username = username
         self.token = auth
-        self.session = requests.Session()
+
+        self.session = async_session
+        self.sem = asyncio.Semaphore(10)
+        self.lock = asyncio.Lock()
+
         self.headers = {"Authorization": f"Token {self.token}"}
         self.request_url = (
             "https://www.pythonanywhere.com"
@@ -49,71 +87,83 @@ class User:
         if len(self.token) != 40:
             raise_error((401, "Invalid token."))
 
-    def request(self, method: str, url: str, **kwargs) -> requests.models.Response:
-        """
-        Custom function to send http requests which handles errors as well.
+    async def request(
+        self, method: str, url: str, return_json: bool = False, **kwargs
+    ) -> Any:
+        """Request function for the module"""
 
-        Args:
-            method (str): method for the http request
-            url (str): URL for the http request
-            **kwargs: any additional kwargs such as "data" for post requests
+        if not self.session:
+            self.session = aiohttp.ClientSession()
 
-        Returns:
-            requests.models.Response
-        """
-        resp = None
-
-        try:
-            resp = self.session.request(
-                method, self.request_url + url, headers=self.headers, **kwargs
+        async with self.sem:
+            resp = await self.session.request(
+                method=method,
+                url=self.request_url + url,
+                headers=self.headers,
+                **kwargs,
             )
-            jsoned = resp.json()
+            return await _parse_json(resp, return_json)
 
-            for key in ("detail", "error", "error_message", "non_field_errors"):
-                if key in jsoned:
-                    raise_error((resp.status_code, jsoned[key]))
-
-            return resp
-        except json.decoder.JSONDecodeError:
-            return resp
-
-    @cache_func(seconds=300)
-    def get_cpu_info(self) -> dict:
+    async def get_cpu_info(self) -> dict:
         """
         Gets CPU information.
 
         Returns:
             dict: dictionary that contains relevant information (next_reset_time, time_left, time_left_untiL_reset)
         """
-        return self.request("GET", f"/api/v0/user/{self.username}/cpu/").json()
+        return await self.request(
+            "GET", f"/api/v0/user/{self.username}/cpu/", return_json=True
+        )
 
-    def consoles(self) -> dict[str, list[Console]]:
+    async def shared_consoles(self) -> list[Console]:
         """
-        Return a list of consoles for the user.
+        Return shared consoles for the user. This is not being cached because shared consoles are accessed by several
+        people therefore, it's likely that the cache will be inaccurate.
 
         Returns:
-            Dict[str, List[Console]]:
-            dictionary with keys (personal, shared) and values of shared and personal consoles.
+            list[Console]: list of shared consoles
         """
-        personal = self.request("GET", f"/api/v0/user/{self.username}/consoles/").json()
-        shared = self.request(
-            "GET", f"/api/v0/user/{self.username}/consoles/shared_with_you/"
-        ).json()
+        return [
+            Console(console, self)
+            for console in await self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/consoles/shared_with_you/",
+                return_json=True,
+            )
+        ]
 
-        return {
-            "personal": [Console(console, self) for console in personal],
-            "shared": [Console(console, self) for console in shared],
-        }
+    async def consoles(self) -> list[Console]:
+        """
+        Return a list of personal consoles for the user.
 
-    def get_console_by_id(self, id_: int) -> Console:
+        Returns:
+            list[Console]: list of shared personal consoles
+        """
+        consoles = await self.cache.all("console") or [
+            Console(console, self)
+            for console in await self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/consoles//",
+                return_json=True,
+            )
+        ]
+        await self.cache.set("console", object_=consoles, allow_all_usage=True)
+
+        return consoles
+
+    async def get_console_by_id(self, id_: int) -> Console:
         """Get a console by its id."""
-        resp = self.request(
-            "GET", f"/api/v0/user/{self.username}/consoles/{id_}"
-        ).json()
+        console = await self.cache.get("console", id_=id_) or Console(
+            await self.request(
+                "GET", f"/api/v0/user/{self.username}/consoles/{id_}", return_json=True
+            ),
+            self,
+        )
+        await self.cache.set("console", object_=console)
 
-        return Console(resp, self)
+        return console
 
-    def create_console(
+    async def create_console(
         self, executable: str, workingdir: str = None, arguments: str = ""
     ) -> Optional[Console]:
         """
@@ -125,30 +175,37 @@ class User:
             arguments (str): working directory for console
 
         Examples:
-            >>> User(...).create_console('python3.8')
+            >>> user = User(...)
+            >>> await user.create_console('python3.8')
 
         Returns:
             Optional[Console]: console object, console sucessfully created or None if console limit was hit
         """
+        url = f"/api/v0/user/{self.username}/consoles/"
+
         try:
-            resp = self.request(
+            resp = await self.request(
                 "POST",
-                f"/api/v0/user/{self.username}/consoles/",
+                url,
+                return_json=True,
                 data={
                     "executable": executable,
                     "arguments": arguments,
                     "working_directory": workingdir,
                 },
-            ).json()
-
-            return Console(resp, self)
-
+            )
         except json.decoder.JSONDecodeError:
-            raise_error((403, "You've reached the maximum number of consoles."))
+            raise_error((429, "Console limit reached."))
 
-    def listdir(
+        # noinspection PyUnboundLocalVariable
+        console = Console(resp, self)
+        await self.cache.set("console", object_=console)
+
+        return console
+
+    async def listdir(
         self, path: str, recursive: bool = False, only_subdirectories: bool = True
-    ) -> Iterator[str]:
+    ) -> AsyncIterator[str]:
         """
         List dir that crawls into dirs (if recursive is set to true), if not, list files and sub-dirs in a directory.
 
@@ -158,14 +215,17 @@ class User:
             only_subdirectories (bool): self explanatory
 
         Examples:
-            >>> User(...).listdir('/home/yourname/my_site/', recursive=True)
+            >>> user = User(...)
+            >>> async for await user.listdir('/home/yourname/my_site/', recursive=True)
 
         Returns:
-            Iterator[str]: generator with paths
+            AsyncIterator[str]: generator with paths
         """
-        resp = self.request(
-            "GET", f"/api/v0/user/{self.username}/files/tree/?path={path}"
-        ).json()
+        resp = await self.request(
+            "GET",
+            f"/api/v0/user/{self.username}/files/tree/?path={path}",
+            return_json=True,
+        )
 
         if not recursive:
             yield resp
@@ -173,11 +233,14 @@ class User:
 
         for path in resp:
             if path.endswith("/"):
-                yield from self.listdir(path, True, not only_subdirectories)
+                async for item in self.listdir(path, True, not only_subdirectories):
+                    yield item
+                    await asyncio.sleep(0)
             elif only_subdirectories:
                 yield path
+                await asyncio.sleep(0)
 
-    def get_file_by_path(self, path: str) -> File:
+    async def get_file_by_path(self, path: str) -> File:
         """
         Function to get a file. Does not error if not found.
 
@@ -187,10 +250,9 @@ class User:
         Returns:
             File: File class (see pyaww.file)
         """
-
         return File(path, self)
 
-    def create_file(self, path: str, file: TextIO) -> File:
+    async def create_file(self, path: str, file: TextIO) -> File:
         """
         Create or update a file at a path.
 
@@ -199,53 +261,67 @@ class User:
             file (TextIO): file to be created / updated
 
         Examples:
+            >>> user = User(...)
             >>> with open('./grocery_list.txt') as f:
-            >>>    User(...).create_file('/home/yourname/grocery_list.txt', f)
+            >>>    await user.create_file('/home/yourname/grocery_list.txt', f)
         """
-        self.request(
+        await self.request(
             "POST",
             f"/api/v0/user/{self.username}/files/path/{path}",
-            files={"content": file},
+            return_json=True,
+            data={"content": file},
         )
 
         return File(path, self)
 
-    @cache_func(300)
-    def students(self) -> dict:
+    async def students(self) -> dict:
         """List students of the user."""
-        return self.request("GET", f"/api/v0/user/{self.username}/students/").json()
+        return await self.request(
+            "GET", f"/api/v0/user/{self.username}/students/", return_json=True
+        )
 
-    @update_cached_function(corresponding_function="students")
-    def remove_student(self, student: str) -> None:
+    async def remove_student(self, student: str) -> None:
         """Remove a student from the students list."""
-        self.request("DELETE", f"/api/v0/user/{self.username}/students/{student}")
+        try:
+            await self.request(
+                "DELETE", f"/api/v0/user/{self.username}/students/{student}"
+            )
+        except json.decoder.JSONDecodeError:
+            pass
 
-    def tasks(self) -> dict[str, list]:
-        """
-        Get tasks for the user.
+    async def always_on_tasks(self) -> list[AlwaysOnTask]:
+        """Get always on tasks"""
+        always_on = await self.request(
+            "GET", f"/api/v0/user/{self.username}/always_on", return_json=True
+        )
 
-        Returns:
-            dictionary containing both scheduled and always_on tasks
-        """
-        schedules = self.request(
-            "GET", f"/api/v0/user/{self.username}/schedule/"
-        ).json()
-        always_on = self.request(
-            "GET", f"/api/v0/user/{self.username}/always_on"
-        ).json()
-        return {
-            "scheduled_tasks": [SchedTask(i, self) for i in schedules],
-            "always_on_tasks": [AlwaysOnTask(i, self) for i in always_on],
-        }
+        return [AlwaysOnTask(i, self) for i in always_on]
 
-    def get_sched_task_by_id(self, id_: int) -> SchedTask:
+    async def scheduled_tasks(self) -> list[SchedTask]:
+        """Get scheduled tasks."""
+        sched_tasks = await self.cache.all("sched_task") or [
+            SchedTask(sched_task, self)
+            for sched_task in await self.request(
+                "GET", f"/api/v0/user/{self.username}/schedule/", return_json=True
+            )
+        ]
+        await self.cache.set("sched_task", object_=sched_tasks, allow_all_usage=True)
+
+        return sched_tasks
+
+    async def get_sched_task_by_id(self, id_: int) -> SchedTask:
         """Get a scheduled task via it's id."""
-        resp = self.request(
-            "GET", f"/api/v0/user/{self.username}/schedule/{id_}/"
-        ).json()
-        return SchedTask(resp, self)
+        sched_task = await self.cache.get("sched_task", id_=id_) or SchedTask(
+            await self.request(
+                "GET", f"/api/v0/user/{self.username}/schedule/{id_}/", return_json=True
+            ),
+            self,
+        )
+        await self.cache.set("sched_task", object_=sched_task)
 
-    def create_sched_task(
+        return sched_task
+
+    async def create_sched_task(
         self,
         command: str,
         minute: str,
@@ -266,26 +342,33 @@ class User:
             description (str): description of the task
 
         Examples:
-            >>> User(...).create_sched_task('cmd', '5', '5', 'daily', False, 'do "cmd"')
+            >>> user = User(...)
+            >>> await user.create_sched_task('cmd', '5', '5', 'daily', False, 'do "cmd"')
 
         Returns:
             SchedTask
         """
-        data = {
-            "command": command,
-            "enabled": enabled,
-            "interval": interval,
-            "hour": hour,
-            "minute": minute,
-            "description": description,
-        }
+        sched_task = SchedTask(
+            await self.request(
+                "POST",
+                f"/api/v0/user/{self.username}/schedule/",
+                return_json=True,
+                data={
+                    "command": command,
+                    "enabled": enabled,
+                    "interval": interval,
+                    "hour": hour,
+                    "minute": minute,
+                    "description": description,
+                },
+            ),
+            self,
+        )
+        await self.cache.set("sched_task", object_=sched_task)
 
-        resp = self.request(
-            "POST", f"/api/v0/user/{self.username}/schedule/", data=data
-        ).json()
-        return SchedTask(resp, self)
+        return sched_task
 
-    def create_always_on_task(
+    async def create_always_on_task(
         self, command: str, description: str = "", enabled: bool = True
     ) -> AlwaysOnTask:
         """
@@ -297,43 +380,50 @@ class User:
             enabled (bool): whether the task should be enabled upon creation
 
         Examples:
-            >>> User(...).create_always_on_task('/home/yourname/myscript.py', 'Scrape a website', True)
+            >>> user = User(...)
+            >>> await user.create_always_on_task('/home/yourname/myscript.py', 'Scrape a website', True)
 
         Returns:
             AlwaysOnTask
         """
         data = {"command": command, "description": description, "enabled": enabled}
 
-        resp = self.request(
-            "POST", f"/api/v0/user/{self.username}/always_on/", data=data
-        ).json()
+        resp = await self.request(
+            "POST",
+            f"/api/v0/user/{self.username}/always_on/",
+            return_json=True,
+            data=data,
+        )
         return AlwaysOnTask(resp, self)
 
-    def get_always_on_task_by_id(self, id_: int) -> AlwaysOnTask:
+    async def get_always_on_task_by_id(self, id_: int) -> AlwaysOnTask:
         """Gets an always_on task."""
-        resp = self.request(
-            "GET", f"/api/v0/user/{self.username}/always_on/{id_}/"
-        ).json()
+        resp = await self.request(
+            "GET", f"/api/v0/user/{self.username}/always_on/{id_}/", return_json=True
+        )
         return AlwaysOnTask(resp, self)
 
-    @cache_func(seconds=180)
-    def python_versions(self) -> list:
+    async def python_versions(self) -> list:
         """Get all 3 ("python3", "python" and "run button") versions."""
         return [
-            self.request(
-                "GET", f"/api/v0/user/{self.username}/default_python3_version/"
-            ).json(),
-            self.request(
-                "GET", f"/api/v0/user/{self.username}/default_python_version/"
-            ).json(),
-            self.request(
+            await self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/default_python3_version/",
+                return_json=True,
+            ),
+            await self.request(
+                "GET",
+                f"/api/v0/user/{self.username}/default_python_version/",
+                return_json=True,
+            ),
+            await self.request(
                 "GET",
                 f"/api/v0/user/{self.username}/default_save_and_run_python_version/",
-            ).json(),
+                return_json=True,
+            ),
         ]
 
-    @update_cached_function(corresponding_function="python_versions")
-    def set_python_version(self, version: float, command: str) -> None:
+    async def set_python_version(self, version: float, command: str) -> None:
         """
         Set default python version.
 
@@ -342,53 +432,56 @@ class User:
             command (str): takes "python3", "python" and/or "save_and_run_python"
 
         Examples:
-            >>> User(...).set_python_version(3.8, 'python3')
+            >>> user = User(...)
+            >>> user.set_python_version(3.8, 'python3')
         """
-        self.request(
+        await self.request(
             "PATCH",
             f"/api/v0/user/{self.username}/default_{command}_version/",
             data={f"default_{command}_version": version},
         )
 
-    @cache_func(seconds=300)
-    def get_system_image(self) -> dict:
+    async def get_system_image(self) -> dict:
         """
         Get the current system image.
 
         The system image for your account determines the versions of Python that you can use and the packages that
         are pre-installed.
         """
-        return self.request("GET", f"/api/v0/user/{self.username}/system_image/").json()
+        return await self.request(
+            "GET", f"/api/v0/user/{self.username}/system_image/", return_json=True
+        )
 
-    @update_cached_function(corresponding_function="get_system_image")
-    def set_system_image(self, system_image: str) -> None:
+    async def set_system_image(self, system_image: str) -> None:
         """
         Set the system image. Please see https://help.pythonanywhere.com/pages/ChangingSystemImage for the table.
 
         Args:
             system_image (str): system image to be set
         """
-        self.request(
+        await self.request(
             "PATCH",
             f"/api/v0/user/{self.username}/system_image/",
             data={"system_image": system_image},
         )
 
-    def get_webapp_by_domain_name(self, domain_name: str) -> WebApp:
+    async def get_webapp_by_domain_name(self, domain_name: str) -> WebApp:
         """Get a webapp via its domain."""
-        resp = self.request(
-            "GET", f"/api/v0/user/{self.username}/webapps/{domain_name}/"
-        ).json()
+        resp = await self.request(
+            "GET",
+            f"/api/v0/user/{self.username}/webapps/{domain_name}/",
+            return_json=True,
+        )
         return WebApp(resp, self)
 
-    @cache_func(300)
-    def webapps(self) -> list[WebApp]:
+    async def webapps(self) -> list[WebApp]:
         """Get webapps for the user."""
-        resp = self.request("GET", f"/api/v0/user/{self.username}/webapps/").json()
+        resp = await self.request(
+            "GET", f"/api/v0/user/{self.username}/webapps/", return_json=True
+        )
         return [WebApp(i, self) for i in resp]
 
-    @update_cached_function(corresponding_function="webapps")
-    def create_webapp(self, domain_name: str, python_version: str) -> WebApp:
+    async def create_webapp(self, domain_name: str, python_version: str) -> WebApp:
         """
         Creata a webapp.
 
@@ -397,23 +490,36 @@ class User:
             python_version (str): python version for the webapp to use (ex: python37 which stands for python 3.7)
 
         Examples:
-            >>> User(...).create_webapp('username.pythonanywhere.com', 'python39')
+            >>> user = User(...)
+            >>> await user.create_webapp('username.pythonanywhere.com', 'python39')
 
         Returns:
             WebApp
         """
         data = {"domain_name": domain_name, "python_version": python_version}
 
-        self.request(
-            "POST", f"/api/v0/user/{self.username}/webapps/", data=data
-        ).json()  # does not return all the necessary data for pyaww.WebApps init
-        return self.get_webapp_by_domain_name(domain_name=domain_name)
+        await self.request(
+            "POST",
+            f"/api/v0/user/{self.username}/webapps/",
+            return_json=True,
+            data=data,
+        )  # does not return all the necessary data for pyaww.WebApps init
+        return await self.get_webapp_by_domain_name(domain_name=domain_name)
 
-    def __enter__(self):
+    async def __aenter__(self):
         return self
 
-    def __del__(self):
-        self.session.close()
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.session.close()
 
     def __str__(self):
         return str(self.headers)
+
+    def __eq__(self, other):
+        return self.headers == getattr(other, "headers", None)
+
+    def __copy__(self) -> "User":
+        return User(
+            username=self.username,
+            auth=self.headers["Authorization"].split("Token ")[1],
+        )

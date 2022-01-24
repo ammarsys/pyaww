@@ -1,12 +1,17 @@
-from pyaww import (
-    always_on_task,
-    console,
-    file,
-    sched_task,
-    static_header,
-    static_file,
-    user,
-    webapp,
+from pyaww.user import (
+    AlwaysOnTask,
+    Console,
+    File,
+    SchedTask,
+    User,
+    WebApp,
+    Cache,
 )
 
-__version__ = "0.0.4"
+from .static_file import StaticFile
+from .static_header import StaticHeader
+
+from .errors import *
+from .types import *
+
+__version__ = "1.0.0"

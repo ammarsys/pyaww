@@ -1,7 +1,8 @@
-from pyaww.file import File
+from typing import AsyncIterator
+import pyaww
 
-data = client.listdir('/home/mysite/')
-data = [client.get_file_by_path(path) for path in data]
-# or
-data = [File(path, client) for path in data]
-   
+client = pyaww.User("...", "...")
+
+
+async def listpath(path: str) -> AsyncIterator:
+    return client.listdir(path)

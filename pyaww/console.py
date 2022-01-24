@@ -1,8 +1,6 @@
-"""Class for the console API endpoints"""
-
 # Standard library imports
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 # Local application/library specific imports
 
@@ -11,7 +9,11 @@ if TYPE_CHECKING:
 
 
 class Console:
-    """All methods of a console."""
+    """
+    Implements Console endpoints.
+
+    See Also https://help.pythonanywhere.com/pages/TypesOfConsoles/
+    """
 
     id: int
     user: "User"
@@ -26,7 +28,7 @@ class Console:
         vars(self).update(resp)
         self._user = user
 
-    def send_input(self, inp: str, end: str = "\n") -> str:
+    async def send_input(self, inp: str, end: str = "\n") -> str:
         """
         Function to send inputs to the console. Console must be started manually before hand.
 
@@ -35,31 +37,38 @@ class Console:
             end (str): pass '' to not "click enter" in console
 
         Examples:
-            >>> console = User(...).get_console_by_id(...)
-            >>> console.send_input("print('hello!')", end='')
+            >>> user = User(...)
+            >>> console = await user.get_console_by_id(...)
+            >>> await console.send_input("print('hello!')", end='')
 
         Returns:
             str: latest writting in the console
         """
-        self._user.request(
+        await self._user.request(
             "POST",
             "/api/v0" + self.console_url + f"send_input/",
             data={"input": inp + end},
         )
+        outs = await self.outputs()
 
-        return self.outputs().split("\r")[-2].strip()
+        return outs.split("\r")[-2].strip()
 
-    def delete(self) -> None:
+    async def delete(self) -> None:
         """Delete the console."""
-        self._user.request("DELETE", "/api/v0" + self.console_url)
+        await self._user.request("DELETE", "/api/v0" + self.console_url)
 
-    def outputs(self) -> str:
-        """Return all outputs in a console."""
-        resp = self._user.request(
-            "GET", "/api/v0" + self.console_url + "get_latest_output/"
-        ).json()
+        await self._user.cache.pop("console", id_=self.id)
+
+    async def outputs(self) -> str:
+        """Return all outputs in the console."""
+        resp = await self._user.request(
+            "GET", "/api/v0" + self.console_url + "get_latest_output/", return_json=True
+        )
 
         return resp["output"]
 
     def __str__(self):
         return self.console_url
+
+    def __eq__(self, other):
+        return self.id == getattr(other, "id", None)

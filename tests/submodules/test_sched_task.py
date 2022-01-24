@@ -1,13 +1,31 @@
+# Standard library imports
+
+from typing import TYPE_CHECKING
+
+# Related third party imports
+
+import pytest
+
 # Local application/library specific imports
 
-from pyaww.user import SchedTask
+if TYPE_CHECKING:
+    from pyaww import SchedTask, User
 
 
-def test_update(scheduled_task: SchedTask) -> None:
-    scheduled_task.update(description='A')
-    scheduled_task.update(description='B')
-    assert scheduled_task.description == 'B'
+@pytest.mark.asyncio
+async def test_update(client: "User", scheduled_task: "SchedTask") -> None:
+    await scheduled_task.update(description="A")
+    await scheduled_task.update(description="B")
+    assert scheduled_task.description == "B"
+
+    cached = await client.cache.get("sched_task", scheduled_task.id)
+    assert scheduled_task.description == cached.description  # type: ignore
 
 
-def test_delete(scheduled_task: SchedTask) -> None:
-    assert scheduled_task.delete() is None
+@pytest.mark.asyncio
+async def test_delete(client: "User", scheduled_task: "SchedTask") -> None:
+    await client.cache.set("sched_task", object_=scheduled_task)
+
+    assert await scheduled_task.delete() is None
+
+    assert await client.cache.get("sched_task", scheduled_task.id) is None
