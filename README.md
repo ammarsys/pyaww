@@ -28,10 +28,10 @@ for help please open an [issue](https://github.com/ammarsys/pyaww/issues).
 
 ```
 # Linux/MacOS
-python3 -m pip install pyaww
+python3 -m pip install pyaww==1.0.0
 
 # Windows
-py -m pip install pyaww
+py -m pip install pyaww==1.0.0
 ```
 
 # Quick Example
