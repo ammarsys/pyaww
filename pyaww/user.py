@@ -8,6 +8,7 @@ from typing import AsyncIterator, Optional, TextIO, Union, Any
 # Related third party imports
 
 import aiohttp
+from pyaww.utils.limiter import limiter
 
 # Local application/library specific imports
 
@@ -92,6 +93,7 @@ class User:
     ) -> Any:
         """Request function for the module"""
 
+        limiter(str)
         if not self.session:
             self.session = aiohttp.ClientSession()
 
