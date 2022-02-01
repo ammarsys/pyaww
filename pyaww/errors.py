@@ -1,6 +1,9 @@
 # Standard library imports
 
+from datetime import datetime
 from typing import NoReturn
+
+from pyaww.utils.limiter import Route
 
 
 class PythonAnywhereError(Exception):
@@ -32,6 +35,9 @@ ERRORS_DICT: dict[tuple[int, str], PythonAnywhereError] = {
     (429, "Console limit reached."): ConsoleLimit("Console limit reached.", 429),
 }
 
+def raise_limit_error_and_await(route: Route) -> NoReturn:
+    await_for = route.sleep_until().timestamp() - datetime.now().timestamp()
+    raise ConsoleLimit("Console limit reached for route " + route.url + "please retry after " + await_for + "seconds", 429)
 
 def raise_error(data: tuple[int, str]) -> NoReturn:
     """
