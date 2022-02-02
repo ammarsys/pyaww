@@ -1,11 +1,11 @@
-from pyaww.utils import limiter
-from pyaww import errors
-
 import pytest
 
+from pyaww.user import User
+from pyaww.errors import ConsoleLimit
+
 @pytest.mark.asyncio
-async def test_limiter() -> None:
+async def test_limiter(client: User) -> None:
     for i in range(49):
-        limiter.limiter("/test")
-    with pytest.raises(errors.ConsoleLimit):
-        await limiter.limiter("/test")
+        client.limiter("/test")
+    with pytest.raises(ConsoleLimit):
+        client.limiter("/test")

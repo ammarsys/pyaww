@@ -8,7 +8,7 @@ from typing import AsyncIterator, Optional, TextIO, Union, Any
 # Related third party imports
 
 import aiohttp
-from pyaww.utils.limiter import limiter
+
 
 # Local application/library specific imports
 
@@ -17,8 +17,9 @@ from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
-from .errors import raise_error
+from .errors import raise_error, raise_limit_error_and_await
 from .utils import Cache
+from .utils.limiter import Route
 
 
 async def _parse_json(
@@ -77,6 +78,7 @@ class User:
         self.session = async_session
         self.sem = asyncio.Semaphore(10)
         self.lock = asyncio.Lock()
+        self.routes = {}
 
         self.headers = {"Authorization": f"Token {self.token}"}
         self.request_url = (
@@ -88,12 +90,19 @@ class User:
         if len(self.token) != 40:
             raise_error((401, "Invalid token."))
 
+
+    def limiter(self, url: str) -> None:
+        if url not in self.routes:
+            self.routes[url] = Route(url)
+        if self.routes[url].callable() == False:
+            raise_limit_error_and_await(self.routes[url])
+
     async def request(
         self, method: str, url: str, return_json: bool = False, **kwargs
     ) -> Any:
         """Request function for the module"""
 
-        limiter(str)
+        self.limiter(url)
         if not self.session:
             self.session = aiohttp.ClientSession()
 
