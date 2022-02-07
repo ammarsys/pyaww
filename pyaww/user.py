@@ -92,6 +92,7 @@ class User:
 
 
     def limiter(self, url: str) -> None:
+        """ creates Route object for new routes and calls raise_limit_error if route is not callable"""
         if url not in self.routes:
             self.routes[url] = Route(url)
         if self.routes[url].callable() == False:

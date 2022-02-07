@@ -38,6 +38,7 @@ ERRORS_DICT: dict[tuple[int, str], PythonAnywhereError] = {
 }
 
 def raise_limit_error_and_await(route: Route) -> NoReturn:
+    """Raise the Route Limit error with its corresponding url message"""
     await_for = int(route.sleep_until().timestamp() - datetime.now().timestamp())
     raise RouteLimit("limit reached for route " + route.url + " please retry after " + str(await_for) + " seconds", 429)
 
