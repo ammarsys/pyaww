@@ -69,6 +69,8 @@ class User:
             from_eu (bool): Whether you are from europe or not, because European accounts API URL is different
         """
         self.use_cache = True
+        self.use_limiter = True
+        self.disable_limiter_for_routes = []
         self.cache = Cache()
 
         self.from_eu = from_eu
@@ -103,7 +105,8 @@ class User:
     ) -> Any:
         """Request function for the module"""
 
-        self.limiter(url)
+        if self.use_limiter and url not in self.disable_limiter_for_routes:
+            self.limiter(url)
         if not self.session:
             self.session = aiohttp.ClientSession()
 
