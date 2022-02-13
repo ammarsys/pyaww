@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 SLEEPING_TIME = 1
 class Route:
     """ Each called route will create a Route class that manages itself to limit itself """
+    
     def __init__(self, url) -> None:
-        self.limit = 40
+        self.limit = 40 if not is_console_input(url) else 120
         self.calls = 0
         self.url = url
         self.timer_end = datetime.now()
@@ -31,3 +32,6 @@ class Route:
             return False
         self.calls += 1
         return True
+
+def is_console_input(url: str) -> bool:
+        return url.split('/')[-2] == 'send_input'

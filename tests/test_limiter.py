@@ -6,11 +6,18 @@ from time import sleep
 
 @pytest.mark.asyncio
 async def test_limiter(client: User) -> None:
+    normal_route = "/test"
+    console_route = "/api/v0/user/user/consoles/1/send_input/"
     for _ in range(40):
-        client.limiter("/test")
+        client.limiter(normal_route)
+    for _ in range(120):
+        client.limiter(console_route)
     #check that it raises an error now that we went over the limit
-    with pytest.raises(RouteLimit, match='limit reached for route /test please retry after 60 seconds'):
-        client.limiter("/test")
+    with pytest.raises(RouteLimit):
+        client.limiter(normal_route)
+    with pytest.raises(RouteLimit):
+        client.limiter(console_route)
     #wait until limiter resets
     sleep(60)
-    client.limiter("/test")
+    client.limiter(normal_route)
+    client.limiter(console_route)
