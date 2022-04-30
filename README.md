@@ -24,7 +24,7 @@ An API wrapper around the PythonAnywhere's API. The name stands for `py`thon`a`n
 We strive to provide an easy-to-use, batteries included modern API wrapper. The documentation can be found [here](https://pyaww-docs.vercel.app/), 
 for help please open an [issue](https://github.com/ammarsys/pyaww/issues).
 
-**At the moment, this module isn't being worked on but that is to change in aprox. one month. I am currently busy with exams.**
+### At the moment, this module isn't being worked on but that is to change in aprox. one month. I am currently busy with exams.
 
 # Installation
 
