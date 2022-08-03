@@ -1,6 +1,9 @@
 # Standard library imports
 
+from datetime import datetime
 from typing import NoReturn
+
+from .utils.limiter import Route
 
 
 class PythonAnywhereError(Exception):
@@ -18,6 +21,8 @@ class InvalidInfo(PythonAnywhereError):
 class NotFound(InvalidInfo):
     """Exception for handling 404's."""
 
+class RouteLimit(InvalidInfo):
+    """Exception for handling 429 rate limiter errors for when user has made too many requests to a route"""
 
 class ConsoleLimit(InvalidInfo):
     """Exception for handling 429's raised by having more then 2 consoles on a free plan"""
@@ -32,6 +37,10 @@ ERRORS_DICT: dict[tuple[int, str], PythonAnywhereError] = {
     (429, "Console limit reached."): ConsoleLimit("Console limit reached.", 429),
 }
 
+def raise_limit_error_and_await(route: Route) -> NoReturn:
+    """Raise the Route Limit error with its corresponding url message"""
+    await_for = int(route.sleep_until().timestamp() - datetime.now().timestamp())
+    raise RouteLimit("limit reached for route " + route.url + " please retry after " + str(await_for) + " seconds", 429)
 
 def raise_error(data: tuple[int, str]) -> NoReturn:
     """

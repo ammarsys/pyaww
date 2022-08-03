@@ -9,6 +9,7 @@ from typing import AsyncIterator, Optional, TextIO, Union, Any
 
 import aiohttp
 
+
 # Local application/library specific imports
 
 from .console import Console
@@ -16,8 +17,9 @@ from .file import File
 from .sched_task import SchedTask
 from .always_on_task import AlwaysOnTask
 from .webapp import WebApp
-from .errors import raise_error
+from .errors import raise_error, raise_limit_error_and_await
 from .utils import Cache
+from .utils.limiter import Route
 
 
 async def _parse_json(
@@ -67,6 +69,8 @@ class User:
             from_eu (bool): Whether you are from europe or not, because European accounts API URL is different
         """
         self.use_cache = True
+        self.use_limiter = True
+        self.disable_limiter_for_routes = []
         self.cache = Cache()
 
         self.from_eu = from_eu
@@ -76,6 +80,7 @@ class User:
         self.session = async_session
         self.sem = asyncio.Semaphore(10)
         self.lock = asyncio.Lock()
+        self.routes = {}
 
         self.headers = {"Authorization": f"Token {self.token}"}
         self.request_url = (
@@ -87,11 +92,21 @@ class User:
         if len(self.token) != 40:
             raise_error((401, "Invalid token."))
 
+
+    def limiter(self, url: str) -> None:
+        """ creates Route object for new routes and calls raise_limit_error if route is not callable"""
+        if url not in self.routes:
+            self.routes[url] = Route(url)
+        if self.routes[url].callable() == False:
+            raise_limit_error_and_await(self.routes[url])
+
     async def request(
         self, method: str, url: str, return_json: bool = False, **kwargs
     ) -> Any:
         """Request function for the module"""
 
+        if self.use_limiter and url not in self.disable_limiter_for_routes:
+            self.limiter(url)
         if not self.session:
             self.session = aiohttp.ClientSession()
 
